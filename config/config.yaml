@@ -6,3 +6,34 @@ data_ingestion:
   source_URL: https://drive.google.com/file/d/13GRmxB4JS2d-5MYqWV63zYXRO5zhEjYp/view
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
+
+data_validation:
+  root_dir: artifacts/data_validation
+  
+  data_dir: artifacts/data_ingestion/AI-OCR dataset
+
+  report_dir: artifacts/data_validation
+
+  min_width: 100
+
+  min_height: 100
+
+  max_width: 10000
+
+  max_height: 10000
+
+  min_file_size_bytes: 1024
+
+  max_file_size_mb: 25
+
+  supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
+
+  recursive: True
+
+  fail_on_empty_dataset: True
+
+  fail_on_corrupt_images: False
+
+  duplicate_detection: True
+
+  generate_report: True  
