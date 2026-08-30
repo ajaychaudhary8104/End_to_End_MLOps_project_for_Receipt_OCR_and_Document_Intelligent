@@ -42,12 +42,12 @@ list_of_files = [
     "app.py",
     "requirements.txt",
     "setup.py",
-    "pyproject.toml"
+    "pyproject.toml",
     "README.md",
     ".gitignore",
 
     # CI/CD
-    ".github/workflows/aws.yaml",
+    ".github/workflows/.gitkeep",
 ]
 
 
