@@ -1,0 +1,1 @@
+# End_to_End_MLOps_project_for_Receipt_OCR_and_Document_Intelligent
