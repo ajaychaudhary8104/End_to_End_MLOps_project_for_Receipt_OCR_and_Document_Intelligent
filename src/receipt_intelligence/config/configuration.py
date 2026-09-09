@@ -1,6 +1,6 @@
 from src.receipt_intelligence.constants import *
 from src.receipt_intelligence.utils.common import read_yaml, create_directories
-from src.receipt_intelligence.entity.config_entity import DataIngestionConfig, DataValidationConfig
+from src.receipt_intelligence.entity.config_entity import DataIngestionConfig, DataValidationConfig , ImagePreprocessingConfig
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -55,3 +55,34 @@ class ConfigurationManager:
             )
     
             return validation_config
+
+    def get_image_preprocessing_config(self) -> ImagePreprocessingConfig:
+    
+            config = self.config.image_preprocessing
+    
+            create_directories(
+                [config.root_dir]
+            )
+    
+            image_preprocessing_config = (ImagePreprocessingConfig(
+                    root_dir=Path(config.root_dir),
+                    input_dir=Path(config.input_dir),
+                    output_dir=Path(config.output_dir),
+                    target_width=config.target_width,
+                    min_width=config.min_width,
+                    min_height=config.min_height,
+                    denoise=config.denoise,
+                    clahe=config.clahe,
+                    adaptive_threshold=config.adaptive_threshold,
+                    deskew=config.deskew,
+                    perspective_correction=config.perspective_correction,
+                    grayscale=config.grayscale,
+                    save_intermediate=config.save_intermediate,
+                    output_extension=config.output_extension,
+                    jpeg_quality=config.jpeg_quality,
+                    max_rotation_angle=config.max_rotation_angle,
+                    supported_extensions=tuple(config.supported_extensions)
+                )
+            )
+    
+            return image_preprocessing_config

@@ -15,31 +15,40 @@ class DataValidationConfig:
     Configuration for validating receipt image datasets.
     """
     root_dir: Path
-    
     data_dir: Path
-
     report_dir: Path
-
     min_width: int 
-
     min_height: int 
-
     max_width: int 
-
     max_height: int 
-
     min_file_size_bytes: int 
-
     max_file_size_mb: int 
-
     supported_extensions: tuple[str, ...]
-
     recursive: bool 
-
     fail_on_empty_dataset: bool 
-
     fail_on_corrupt_images: bool 
-
     duplicate_detection: bool 
-
     generate_report: bool     
+
+@dataclass(frozen=True)
+class ImagePreprocessingConfig:
+    """
+    Configuration for receipt image preprocessing.
+    """
+    root_dir: Path 
+    input_dir: Path
+    output_dir: Path
+    target_width: int
+    min_width: int 
+    min_height: int 
+    denoise: bool 
+    clahe: bool
+    adaptive_threshold: bool 
+    deskew: bool 
+    perspective_correction: bool 
+    grayscale: bool 
+    save_intermediate: bool 
+    output_extension: str 
+    jpeg_quality: int 
+    max_rotation_angle: float 
+    supported_extensions: tuple[str, ...]     

@@ -37,3 +37,22 @@ data_validation:
   duplicate_detection: True
 
   generate_report: True  
+
+image_preprocessing:
+    root_dir: artifacts/image_preprocessing
+    input_dir: artifacts/data_ingestion/AI-OCR dataset
+    output_dir: artifacts/image_preprocessing/preprocessed_images
+    target_width: 1600
+    min_width: 100
+    min_height: 100
+    denoise: True
+    clahe: True
+    adaptive_threshold: False
+    deskew: True
+    perspective_correction: True
+    grayscale: True
+    save_intermediate: False
+    output_extension: ".png"
+    jpeg_quality: 95
+    max_rotation_angle: 45.0
+    supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
