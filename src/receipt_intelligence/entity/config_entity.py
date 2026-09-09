@@ -52,3 +52,23 @@ class ImagePreprocessingConfig:
     jpeg_quality: int 
     max_rotation_angle: float 
     supported_extensions: tuple[str, ...]     
+
+@dataclass(frozen=True)
+class OCREngineConfig:
+    """
+    Configuration for PaddleOCR inference.
+    """
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    model_name: str 
+    language: str
+    device: str 
+    text_detection_score_threshold: float
+    text_recognition_score_threshold: float 
+    use_doc_orientation_classify: bool
+    use_doc_unwarping: bool 
+    use_textline_orientation: bool
+    save_visualization: bool 
+    recursive: bool 
+    supported_extensions: tuple[str, ...]    

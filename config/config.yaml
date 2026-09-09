@@ -3,56 +3,59 @@ artifacts_root: artifacts
 
 data_ingestion:
   root_dir: artifacts/data_ingestion
-  source_URL: https://drive.google.com/file/d/13GRmxB4JS2d-5MYqWV63zYXRO5zhEjYp/view
+  source_URL: https://drive.google.com/file/d/1WVRlflI5jIZEeW39xMn1SDV005WSUUmI/view
   local_data_file: artifacts/data_ingestion/data.zip
-  unzip_dir: artifacts/data_ingestion
+  unzip_dir: artifacts/data_ingestion/AI-OCR dataset
 
 data_validation:
   root_dir: artifacts/data_validation
-  
   data_dir: artifacts/data_ingestion/AI-OCR dataset
-
   report_dir: artifacts/data_validation
-
   min_width: 100
-
   min_height: 100
-
   max_width: 10000
-
   max_height: 10000
-
   min_file_size_bytes: 1024
-
   max_file_size_mb: 25
-
   supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
-
   recursive: True
-
   fail_on_empty_dataset: True
-
   fail_on_corrupt_images: False
-
   duplicate_detection: True
-
   generate_report: True  
 
 image_preprocessing:
-    root_dir: artifacts/image_preprocessing
-    input_dir: artifacts/data_ingestion/AI-OCR dataset
-    output_dir: artifacts/image_preprocessing/preprocessed_images
-    target_width: 1600
-    min_width: 100
-    min_height: 100
-    denoise: True
-    clahe: True
-    adaptive_threshold: False
-    deskew: True
-    perspective_correction: True
-    grayscale: True
-    save_intermediate: False
-    output_extension: ".png"
-    jpeg_quality: 95
-    max_rotation_angle: 45.0
-    supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
+  root_dir: artifacts/image_preprocessing
+  input_dir: artifacts/data_ingestion/AI-OCR dataset
+  output_dir: artifacts/image_preprocessing/preprocessed_images
+  target_width: 1600
+  min_width: 100
+  min_height: 100
+  denoise: True
+  clahe: True
+  adaptive_threshold: False
+  deskew: True
+  perspective_correction: True
+  grayscale: True
+  save_intermediate: False
+  output_extension: ".png"
+  jpeg_quality: 95
+  max_rotation_angle: 45.0
+  supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
+
+ocr_engine:
+  root_dir: artifacts/ocr_engine
+  input_dir: artifacts/image_preprocessing/preprocessed_images
+  output_dir: artifacts/ocr_engine/ocr_results
+  model_name: PP-OCRv5
+  language: en
+  device: cpu
+  text_detection_score_threshold: 0.30
+  text_recognition_score_threshold: 0.30
+  use_doc_orientation_classify: False
+  use_doc_unwarping: False
+  use_textline_orientation: False
+  save_visualization: False
+  recursive: True
+  supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
+  

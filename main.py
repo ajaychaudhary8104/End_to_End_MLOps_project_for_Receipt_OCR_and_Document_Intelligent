@@ -2,6 +2,7 @@ from src.receipt_intelligence import logger
 from src.receipt_intelligence.pipeline.stage_01_data_ingestion import DataIngestionTrainingPipeline
 from src.receipt_intelligence.pipeline.stage_02_data_validation import DataValidationTrainingPipeline
 from src.receipt_intelligence.pipeline.stage_03_image_preprocessing import ImagePreprocessingTrainingPipeline
+from receipt_intelligence.pipeline.stage_04_ocr_engine import OCREngineTrainingPipeline
 import warnings
 
 warnings.filterwarnings(
@@ -21,8 +22,8 @@ try:
    data_ingestion.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
-        logger.exception(e)
-        raise e
+   logger.exception(e)
+   raise e
 
 STAGE_NAME = "Data Validation stage"
 try:
@@ -31,8 +32,8 @@ try:
    data_validation.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
-        logger.exception(e)
-        raise e
+   logger.exception(e)
+   raise e
 
 STAGE_NAME = "Image Preprocessing stage"
 try:
@@ -41,5 +42,15 @@ try:
    image_preprocessing.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
-        logger.exception(e)
-        raise e
+   logger.exception(e)
+   raise e
+
+STAGE_NAME = "OCR Engine stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   ocr_engine = OCREngineTrainingPipeline()
+   ocr_engine.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
