@@ -15,7 +15,7 @@ class OCREngineTrainingPipeline:
         config = ConfigurationManager()
 
         ocr_config = (
-            config.get_ocr_config()
+            config.get_ocr_engine_config()
         )
 
         ocr_engine = OCREngine(
