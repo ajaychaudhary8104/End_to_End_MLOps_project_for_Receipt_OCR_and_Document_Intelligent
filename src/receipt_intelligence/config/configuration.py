@@ -1,7 +1,8 @@
 from src.receipt_intelligence.constants import *
 from src.receipt_intelligence.utils.common import read_yaml, create_directories
 from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, DataValidationConfig ,
-                                                            ImagePreprocessingConfig, OCREngineConfig)
+                                                            ImagePreprocessingConfig, OCREngineConfig,
+                                                            TextCleaningConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -111,3 +112,24 @@ class ConfigurationManager:
             recursive=ocr_engine_config.recursive,
             supported_extensions=tuple(ocr_engine_config.supported_extensions)
         )        
+
+    def get_ocr_text_cleaning_config(self) -> TextCleaningConfig:
+            ocr_text_cleaning_config = self.config.ocr_text_cleaning
+            create_directories([ocr_text_cleaning_config.root_dir,ocr_text_cleaning_config.output_dir])
+    
+            return TextCleaningConfig(
+                root_dir=ocr_text_cleaning_config.root_dir,
+                input_dir=ocr_text_cleaning_config.input_dir,
+                output_dir=ocr_text_cleaning_config.output_dir,
+                min_text_length=ocr_text_cleaning_config.min_text_length,
+                normalize_unicode=ocr_text_cleaning_config.normalize_unicode,
+                normalize_whitespace=ocr_text_cleaning_config.normalize_whitespace,
+                normalize_currency=ocr_text_cleaning_config.normalize_currency,
+                normalize_common_ocr_errors=ocr_text_cleaning_config.normalize_common_ocr_errors,
+                normalize_dates=ocr_text_cleaning_config.normalize_dates,
+                preserve_case=ocr_text_cleaning_config.preserve_case,
+                remove_control_characters=ocr_text_cleaning_config.remove_control_characters,
+                deduplicate_adjacent_lines=ocr_text_cleaning_config.deduplicate_adjacent_lines,
+                remove_empty_lines=ocr_text_cleaning_config.remove_empty_lines,
+                confidence_round_digits=ocr_text_cleaning_config.confidence_round_digits
+            )

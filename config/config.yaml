@@ -58,4 +58,20 @@ ocr_engine:
   save_visualization: False
   recursive: True
   supported_extensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".JPG", ".JPEG", ".PNG"]
+
+ocr_text_cleaning:
+  root_dir: artifacts/ocr_text_cleaning
+  input_dir: artifacts/ocr_engine/ocr_results
+  output_dir: artifacts/ocr_text_cleaning
+  min_text_length: 1
+  normalize_unicode: True
+  normalize_whitespace: True
+  normalize_currency: True
+  normalize_common_ocr_errors: True
+  normalize_dates: True
+  preserve_case: True
+  remove_control_characters: True
+  deduplicate_adjacent_lines: True
+  remove_empty_lines: True
+  confidence_round_digits: 4
   

@@ -71,4 +71,27 @@ class OCREngineConfig:
     use_textline_orientation: bool
     save_visualization: bool 
     recursive: bool 
-    supported_extensions: tuple[str, ...]    
+    supported_extensions: tuple[str, ...]
+
+@dataclass(frozen=True)
+class TextCleaningConfig:
+    """
+    Configuration for OCR text normalization.
+
+    This layer is intentionally conservative. Its purpose is
+    to clean OCR noise while preserving business-relevant text.
+    """
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    min_text_length: int
+    normalize_unicode: bool 
+    normalize_whitespace: bool 
+    normalize_currency: bool 
+    normalize_common_ocr_errors: bool 
+    normalize_dates: bool
+    preserve_case: bool
+    remove_control_characters: bool 
+    deduplicate_adjacent_lines: bool 
+    remove_empty_lines: bool
+    confidence_round_digits: int        

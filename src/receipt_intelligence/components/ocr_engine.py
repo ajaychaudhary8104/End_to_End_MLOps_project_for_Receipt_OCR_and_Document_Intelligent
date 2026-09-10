@@ -516,11 +516,6 @@ class OCREngine:
             pass
 
         return {}
-
-    # ========================================================
-    # DETECTION / RECOGNITION PARSER
-    # ========================================================
-
     def _parse_paddle_result(
         self,
         result: Any
@@ -528,32 +523,78 @@ class OCREngine:
         """
         Parse PaddleOCR output into stable OCRTextRegion objects.
 
-        Handles common PaddleOCR result key structures.
+        Supports:
+
+        1. Classic PaddleOCR output:
+        [
+            [
+                [[x1,y1],[x2,y2],[x3,y3],[x4,y4]],
+                ("TEXT", score)
+            ],
+            ...
+        ]
+
+        2. PaddleOCR 3.x dictionary outputs:
+        {
+            "dt_polys": ...,
+            "rec_texts": ...,
+            "rec_scores": ...
+        }
         """
 
-        data = self._extract_result_dict(
-            result
-        )
+        # ============================================================
+        # CLASSIC PADDLEOCR FORMAT
+        # ============================================================
 
-        # ----------------------------------------------------
-        # Sometimes result is nested inside {"res": {...}}
-        # ----------------------------------------------------
+        if isinstance(result, list):
+
+            classic_regions = []
+
+            is_classic_format = False
+
+            for item in result:
+
+                if not isinstance(item, (list, tuple)):
+                    continue
+
+                if len(item) < 2:
+                    continue
+
+                bbox = item[0]
+                text_info = item[1]
+
+                if (
+                    isinstance(text_info, (list, tuple))
+                    and len(text_info) >= 2
+                ):
+                    is_classic_format = True
+
+                    text = text_info[0]
+                    score = text_info[1]
+
+                    region = self._build_region(
+                        text=text,
+                        confidence=score,
+                        bbox=bbox
+                    )
+
+                    if region is not None:
+                        classic_regions.append(region)
+
+            if is_classic_format:
+                return classic_regions
+
+        # ============================================================
+        # EXISTING PADDLEOCR 3.x PARSER
+        # ============================================================
+
+        data = self._extract_result_dict(result)
 
         if (
             "res" in data
-            and isinstance(
-                data["res"],
-                dict
-            )
+            and isinstance(data["res"], dict)
         ):
-
             data = data["res"]
-
-        # ----------------------------------------------------
-        # Common PaddleOCR 3.x keys
-        #
-        # dt_polys / rec_texts / rec_scores
-        # ----------------------------------------------------
 
         polygons = (
             data.get("dt_polys")
@@ -577,18 +618,9 @@ class OCREngine:
             or []
         )
 
-        # Convert numpy arrays.
-        polygons = self._to_python(
-            polygons
-        )
-
-        texts = self._to_python(
-            texts
-        )
-
-        scores = self._to_python(
-            scores
-        )
+        polygons = self._to_python(polygons)
+        texts = self._to_python(texts)
+        scores = self._to_python(scores)
 
         if texts is None:
             texts = []
@@ -599,24 +631,13 @@ class OCREngine:
         if polygons is None:
             polygons = []
 
-        # ----------------------------------------------------
-        # Some results return OCR entries as a list of
-        # dictionaries.
-        # ----------------------------------------------------
-
-        if isinstance(
-            data.get("ocr"),
-            list
-        ):
+        if isinstance(data.get("ocr"), list):
 
             regions = []
 
             for item in data["ocr"]:
 
-                if not isinstance(
-                    item,
-                    dict
-                ):
+                if not isinstance(item, dict):
                     continue
 
                 text = (
@@ -650,29 +671,13 @@ class OCREngine:
 
             return regions
 
-        # ----------------------------------------------------
-        # Standard parallel-array parsing
-        # ----------------------------------------------------
-
-        if not isinstance(
-            texts,
-            list
-        ):
-
+        if not isinstance(texts, list):
             texts = [texts]
 
-        if not isinstance(
-            scores,
-            list
-        ):
-
+        if not isinstance(scores, list):
             scores = [scores]
 
-        if not isinstance(
-            polygons,
-            list
-        ):
-
+        if not isinstance(polygons, list):
             polygons = [polygons]
 
         region_count = max(
@@ -683,9 +688,7 @@ class OCREngine:
 
         regions = []
 
-        for index in range(
-            region_count
-        ):
+        for index in range(region_count):
 
             text = (
                 texts[index]
@@ -1089,6 +1092,7 @@ class OCREngine:
             prediction_list = list(
                 predictions
             )
+            print(prediction_list)
 
             if not prediction_list:
 
