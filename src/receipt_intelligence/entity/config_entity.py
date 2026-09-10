@@ -94,4 +94,23 @@ class TextCleaningConfig:
     remove_control_characters: bool 
     deduplicate_adjacent_lines: bool 
     remove_empty_lines: bool
-    confidence_round_digits: int        
+    confidence_round_digits: int
+
+@dataclass(frozen=True)
+class FieldExtractionConfig:
+    """
+    Configuration for hybrid receipt field extraction.
+    """
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    vendor_search_lines: int
+    min_item_name_length: int
+    max_item_name_length: int
+    min_item_price: float
+    max_item_price: float
+    total_keywords: tuple[str, ...]
+    date_search_lines: int
+    total_search_last_lines: int
+    reject_keywords: tuple[str, ...]
+    confidence_round_digits: int            

@@ -74,4 +74,50 @@ ocr_text_cleaning:
   deduplicate_adjacent_lines: True
   remove_empty_lines: True
   confidence_round_digits: 4
-  
+
+field_extraction_engine:
+  root_dir: artifacts/field_extraction_engine
+  input_dir: artifacts/ocr_text_cleaning
+  output_dir: artifacts/field_extraction_engine/extracted_fields
+  vendor_search_lines: 8
+  min_item_name_length: 2
+  max_item_name_length: 80
+  min_item_price: 0.0
+  max_item_price: 1000000
+  total_keywords: [
+      "GRAND TOTAL",
+      "TOTAL AMOUNT",
+      "AMOUNT PAYABLE",
+      "NET AMOUNT",
+      "TOTAL DUE",
+      "BALANCE DUE",
+      "TOTAL",
+  ]
+  date_search_lines: 20
+  total_search_last_lines: 12
+  reject_keywords: [
+      "TOTAL",
+      "SUBTOTAL",
+      "TAX",
+      "VAT",
+      "GST",
+      "CGST",
+      "SGST",
+      "IGST",
+      "DISCOUNT",
+      "CHANGE",
+      "CASH",
+      "CARD",
+      "CREDIT",
+      "DEBIT",
+      "PAYMENT",
+      "INVOICE",
+      "RECEIPT",
+      "DATE",
+      "TIME",
+      "PHONE",
+      "TEL",
+      "ADDRESS",
+      "THANK",
+  ]
+  confidence_round_digits: 4

@@ -2,7 +2,7 @@ from src.receipt_intelligence.constants import *
 from src.receipt_intelligence.utils.common import read_yaml, create_directories
 from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, DataValidationConfig ,
                                                             ImagePreprocessingConfig, OCREngineConfig,
-                                                            TextCleaningConfig)
+                                                            TextCleaningConfig, FieldExtractionConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -133,3 +133,26 @@ class ConfigurationManager:
                 remove_empty_lines=ocr_text_cleaning_config.remove_empty_lines,
                 confidence_round_digits=ocr_text_cleaning_config.confidence_round_digits
             )
+
+    def get_field_extraction_engine_config(self) -> FieldExtractionConfig:
+            field_extraction_config = self.config.field_extraction_engine
+            create_directories([Path(field_extraction_config.root_dir) , Path(field_extraction_config.output_dir)])
+            
+            fe_config = FieldExtractionConfig(
+                root_dir=Path(field_extraction_config.root_dir),
+                input_dir=Path(field_extraction_config.input_dir),
+                output_dir=Path(field_extraction_config.output_dir),
+                vendor_search_lines=field_extraction_config.vendor_search_lines,
+                total_search_last_lines=field_extraction_config.total_search_last_lines,
+                min_item_name_length=field_extraction_config.min_item_name_length,
+                max_item_name_length=field_extraction_config.max_item_name_length,
+                min_item_price=field_extraction_config.min_item_price,
+                max_item_price=field_extraction_config.max_item_price,
+                total_keywords=tuple(field_extraction_config.total_keywords),
+                date_search_lines=field_extraction_config.date_search_lines,
+                reject_keywords=tuple(field_extraction_config.reject_keywords),
+                confidence_round_digits=field_extraction_config.confidence_round_digits,
+    
+            )
+    
+            return fe_config 
