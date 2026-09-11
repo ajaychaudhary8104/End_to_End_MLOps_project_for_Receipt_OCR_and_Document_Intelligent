@@ -5,6 +5,7 @@ from src.receipt_intelligence.pipeline.stage_03_image_preprocessing import Image
 from receipt_intelligence.pipeline.stage_04_ocr_engine import OCREngineTrainingPipeline
 from receipt_intelligence.pipeline.stage_05_ocr_text_cleaning import OCRTextCleaningPipeline
 from receipt_intelligence.pipeline.stage_06_field_extraction_engine import FieldExtractionPipeline
+from src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine import ConfidenceAndReliabilityPipeline
 import warnings
 
 warnings.filterwarnings(
@@ -73,6 +74,16 @@ try:
    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
    field_extraction = FieldExtractionPipeline()
    field_extraction.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
+
+STAGE_NAME = "Confidence and Reliability stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   confidence_and_reliability = ConfidenceAndReliabilityPipeline()
+   confidence_and_reliability.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
    logger.exception(e)

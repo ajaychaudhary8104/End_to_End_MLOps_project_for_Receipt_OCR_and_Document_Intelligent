@@ -121,3 +121,23 @@ field_extraction_engine:
       "THANK",
   ]
   confidence_round_digits: 4
+
+confidence_and_reliability_engine:
+  root_dir: artifacts/confidence_and_reliability_engine
+  input_dir: artifacts/field_extraction_engine/extracted_fields
+  ocr_dir: artifacts/ocr_engine/ocr_results
+  cleaned_ocr_dir: artifacts/ocr_text_cleaning
+  output_dir: artifacts/confidence_and_reliability_engine
+  low_confidence_threshold: 0.70
+  medium_confidence_threshold: 0.90
+  ocr_weight: 0.50
+  pattern_weight: 0.30
+  context_weight: 0.20
+  conflict_penalty: 0.15
+  item_count_mismatch_penalty: 0.20
+  absolute_total_tolerance: 1.00
+  relative_total_tolerance: 0.05
+  confidence_digits: 4
+  save_manifest: True  
+
+

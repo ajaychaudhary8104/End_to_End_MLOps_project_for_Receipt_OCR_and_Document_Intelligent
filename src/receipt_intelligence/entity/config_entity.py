@@ -114,3 +114,25 @@ class FieldExtractionConfig:
     total_search_last_lines: int
     reject_keywords: tuple[str, ...]
     confidence_round_digits: int            
+
+@dataclass(frozen=True)
+class ConfidenceEngineConfig:
+    """
+    Configuration for field-level confidence scoring.
+    """
+    root_dir: Path
+    input_dir: Path
+    ocr_dir: Path
+    cleaned_ocr_dir: Path
+    output_dir: Path
+    low_confidence_threshold: float 
+    medium_confidence_threshold: float
+    ocr_weight: float
+    pattern_weight: float
+    context_weight: float
+    conflict_penalty: float 
+    item_count_mismatch_penalty: float 
+    absolute_total_tolerance: float 
+    relative_total_tolerance: float 
+    confidence_digits: int
+    save_manifest: bool    
