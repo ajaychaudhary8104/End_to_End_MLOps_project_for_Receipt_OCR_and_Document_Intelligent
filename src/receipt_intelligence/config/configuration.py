@@ -3,7 +3,8 @@ from src.receipt_intelligence.utils.common import read_yaml, create_directories
 from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, DataValidationConfig ,
                                                             ImagePreprocessingConfig, OCREngineConfig,
                                                             TextCleaningConfig, FieldExtractionConfig,
-                                                              ConfidenceEngineConfig ,JSONGeneratorConfig)
+                                                              ConfidenceEngineConfig ,JSONGeneratorConfig,
+                                                              FinancialSummaryConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -204,3 +205,24 @@ class ConfigurationManager:
         )
 
         return json_generator_config    
+
+    def get_financial_summary_config(self) -> FinancialSummaryConfig:
+        config = self.config.financial_summary
+
+        financial_summary_config = FinancialSummaryConfig(
+            root_dir=Path(config.root_dir),
+            input_dir=Path(config.input_dir),
+            output_dir=Path(config.output_dir),
+            minimum_confidence=config.minimum_confidence,
+            exclude_review_required=config.exclude_review_required,
+            require_validation_passed=config.require_validation_passed,
+            include_low_confidence_receipts=config.include_low_confidence_receipts,
+            currency_decimals=config.currency_decimals,
+            save_receipt_table=config.save_receipt_table,
+            save_audit_table=config.save_audit_table,
+            save_csv=config.save_csv,
+            save_json=config.save_json,
+            schema_version=config.schema_version
+        )
+
+        return financial_summary_config  

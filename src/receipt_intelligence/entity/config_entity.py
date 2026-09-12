@@ -154,4 +154,20 @@ class JSONGeneratorConfig:
     medium_confidence_threshold: float 
     low_confidence_threshold: float 
     save_manifest: bool 
-    schema_version: str     
+    schema_version: str 
+
+@dataclass(frozen=True)
+class FinancialSummaryConfig:
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    minimum_confidence: float
+    exclude_review_required: bool 
+    require_validation_passed: bool 
+    include_low_confidence_receipts: bool 
+    currency_decimals: int
+    save_receipt_table: bool 
+    save_audit_table: bool 
+    save_csv: bool 
+    save_json: bool 
+    schema_version: str        

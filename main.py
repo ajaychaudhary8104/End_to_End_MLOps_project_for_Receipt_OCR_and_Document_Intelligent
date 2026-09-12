@@ -7,6 +7,7 @@ from receipt_intelligence.pipeline.stage_05_ocr_text_cleaning import OCRTextClea
 from receipt_intelligence.pipeline.stage_06_field_extraction_engine import FieldExtractionPipeline
 from src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine import ConfidenceAndReliabilityPipeline
 from src.receipt_intelligence.pipeline.stage_08_json_generation import JSONGenerationPipeline
+from src.receipt_intelligence.pipeline.stage_09_financial_summary import FinancialSummaryPipeline
 import warnings
 
 warnings.filterwarnings(
@@ -95,6 +96,16 @@ try:
    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
    json_generation = JSONGenerationPipeline()
    json_generation.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
+
+STAGE_NAME = "Financial Summary stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   financial_summary = FinancialSummaryPipeline()
+   financial_summary.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
    logger.exception(e)
