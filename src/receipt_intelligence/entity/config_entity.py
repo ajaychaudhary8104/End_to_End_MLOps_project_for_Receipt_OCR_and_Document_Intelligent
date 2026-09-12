@@ -136,3 +136,22 @@ class ConfidenceEngineConfig:
     relative_total_tolerance: float 
     confidence_digits: int
     save_manifest: bool    
+
+
+@dataclass(frozen=True)
+class JSONGeneratorConfig:
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    include_confidence: bool 
+    include_reliability: bool 
+    include_review_flag: bool 
+    include_evidence: bool 
+    include_source_metadata: bool 
+    include_extraction_metadata: bool 
+    round_amount_digits: int
+    round_confidence_digits: int
+    medium_confidence_threshold: float 
+    low_confidence_threshold: float 
+    save_manifest: bool 
+    schema_version: str     

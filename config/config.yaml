@@ -140,4 +140,47 @@ confidence_and_reliability_engine:
   confidence_digits: 4
   save_manifest: True  
 
+json_generation:
+  root_dir: artifacts/json_generation
+  input_dir: artifacts/confidence_and_reliability_engine
+  output_dir: artifacts/json_generation/json_output
 
+  # --------------------------------------------------------
+  # Confidence metadata
+  # --------------------------------------------------------
+
+  include_confidence: True
+
+  include_reliability: True
+
+  include_review_flag: True
+
+  include_evidence: True
+
+  include_source_metadata: True
+
+  include_extraction_metadata: True
+
+  # --------------------------------------------------------
+  # Numeric normalization
+  # --------------------------------------------------------
+
+  round_amount_digits: 2
+
+  round_confidence_digits: 4
+
+  # --------------------------------------------------------
+  # Reliability thresholds
+  # --------------------------------------------------------
+
+  medium_confidence_threshold:  0.90
+
+  low_confidence_threshold: 0.70
+
+  # --------------------------------------------------------
+  # Batch behavior
+  # --------------------------------------------------------
+
+  save_manifest: True
+
+  schema_version: "1.0"

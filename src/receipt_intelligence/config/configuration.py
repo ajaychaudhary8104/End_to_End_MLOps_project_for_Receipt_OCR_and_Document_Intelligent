@@ -3,7 +3,7 @@ from src.receipt_intelligence.utils.common import read_yaml, create_directories
 from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, DataValidationConfig ,
                                                             ImagePreprocessingConfig, OCREngineConfig,
                                                             TextCleaningConfig, FieldExtractionConfig,
-                                                              ConfidenceEngineConfig)
+                                                              ConfidenceEngineConfig ,JSONGeneratorConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -181,3 +181,26 @@ class ConfigurationManager:
         )
 
         return confidence_engine_config    
+
+    def get_json_generator_config(self) -> JSONGeneratorConfig:
+        config = self.config.json_generation
+
+        json_generator_config = JSONGeneratorConfig(
+            root_dir=Path(config.root_dir),
+            input_dir=Path(config.input_dir),
+            output_dir=Path(config.output_dir),
+            include_confidence=config.include_confidence,
+            include_reliability=config.include_reliability,
+            include_review_flag=config.include_review_flag,
+            include_evidence=config.include_evidence,
+            include_source_metadata=config.include_source_metadata,
+            include_extraction_metadata=config.include_extraction_metadata,
+            round_amount_digits=config.round_amount_digits,
+            round_confidence_digits=config.round_confidence_digits,
+            medium_confidence_threshold=config.medium_confidence_threshold,
+            low_confidence_threshold=config.low_confidence_threshold,
+            save_manifest=config.save_manifest,
+            schema_version=config.schema_version
+        )
+
+        return json_generator_config    

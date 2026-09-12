@@ -6,6 +6,7 @@ from receipt_intelligence.pipeline.stage_04_ocr_engine import OCREngineTrainingP
 from receipt_intelligence.pipeline.stage_05_ocr_text_cleaning import OCRTextCleaningPipeline
 from receipt_intelligence.pipeline.stage_06_field_extraction_engine import FieldExtractionPipeline
 from src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine import ConfidenceAndReliabilityPipeline
+from src.receipt_intelligence.pipeline.stage_08_json_generation import JSONGenerationPipeline
 import warnings
 
 warnings.filterwarnings(
@@ -84,6 +85,16 @@ try:
    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
    confidence_and_reliability = ConfidenceAndReliabilityPipeline()
    confidence_and_reliability.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
+
+STAGE_NAME = "JSON Generation stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   json_generation = JSONGenerationPipeline()
+   json_generation.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
    logger.exception(e)
