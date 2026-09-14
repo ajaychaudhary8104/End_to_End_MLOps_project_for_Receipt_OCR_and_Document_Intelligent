@@ -8,6 +8,7 @@ from receipt_intelligence.pipeline.stage_06_field_extraction_engine import Field
 from src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine import ConfidenceAndReliabilityPipeline
 from src.receipt_intelligence.pipeline.stage_08_json_generation import JSONGenerationPipeline
 from src.receipt_intelligence.pipeline.stage_09_financial_summary import FinancialSummaryPipeline
+from src.receipt_intelligence.pipeline.stage_10_evaluation import EvaluationPipeline
 import warnings
 
 warnings.filterwarnings(
@@ -106,6 +107,16 @@ try:
    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
    financial_summary = FinancialSummaryPipeline()
    financial_summary.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
+
+STAGE_NAME = "Evaluation stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   evaluation = EvaluationPipeline()
+   evaluation.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
    logger.exception(e)

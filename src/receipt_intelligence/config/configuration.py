@@ -4,7 +4,7 @@ from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, 
                                                             ImagePreprocessingConfig, OCREngineConfig,
                                                             TextCleaningConfig, FieldExtractionConfig,
                                                               ConfidenceEngineConfig ,JSONGeneratorConfig,
-                                                              FinancialSummaryConfig)
+                                                              FinancialSummaryConfig, EvaluationConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -226,3 +226,73 @@ class ConfigurationManager:
         )
 
         return financial_summary_config  
+
+    def get_evaluation_config(self) -> EvaluationConfig:
+        config = self.config.evaluation
+
+        create_directories([
+            config.root_dir,
+            config.output_dir,
+        ])
+
+        return EvaluationConfig(
+            root_dir=config.root_dir,
+            prediction_dir=config.prediction_dir,
+            ground_truth_dir=config.ground_truth_dir,
+            ocr_prediction_dir=config.ocr_prediction_dir,
+            output_dir=config.output_dir,
+            ocr_prediction_text_field=config.ocr_prediction_text_field,
+            ocr_prediction_fallback_fields=(
+                config.ocr_prediction_fallback_fields
+            ),
+            allow_prediction_text_fallback=(
+                config.allow_prediction_text_fallback
+            ),
+            text_field_in_ground_truth=(
+                config.text_field_in_ground_truth
+            ),
+            case_sensitive=config.case_sensitive,
+            normalize_whitespace=config.normalize_whitespace,
+            remove_punctuation_for_text_eval=(
+                config.remove_punctuation_for_text_eval
+            ),
+            strict_string_matching=(
+                config.strict_string_matching
+            ),
+            string_similarity_threshold=(
+                config.string_similarity_threshold
+            ),
+            amount_tolerance=config.amount_tolerance,
+            item_price_tolerance=config.item_price_tolerance,
+            item_name_similarity_threshold=(
+                config.item_name_similarity_threshold
+            ),
+            normalize_dates=config.normalize_dates,
+            date_order=config.date_order,
+            cer_warning_threshold=(
+                config.cer_warning_threshold
+            ),
+            wer_warning_threshold=(
+                config.wer_warning_threshold
+            ),
+            item_f1_warning_threshold=(
+                config.item_f1_warning_threshold
+            ),
+            confidence_bin_count=(
+                config.confidence_bin_count
+            ),
+            quality_gate_enabled=(
+                config.quality_gate_enabled
+            ),
+            max_corpus_cer=config.max_corpus_cer,
+            max_corpus_wer=config.max_corpus_wer,
+            min_store_accuracy=config.min_store_accuracy,
+            min_date_accuracy=config.min_date_accuracy,
+            min_total_accuracy=config.min_total_accuracy,
+            min_item_f1=config.min_item_f1,
+            save_detailed_results=(
+                config.save_detailed_results
+            ),
+            save_csv=config.save_csv,
+            save_json=config.save_json,
+        )

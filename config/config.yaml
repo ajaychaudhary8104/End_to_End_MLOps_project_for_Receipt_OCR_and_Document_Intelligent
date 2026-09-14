@@ -171,3 +171,41 @@ financial_summary:
   save_csv: True
   save_json: True
   schema_version: "1.0"
+
+evaluation:
+  root_dir: artifacts/evaluation
+  prediction_dir: artifacts/json_generation
+  ground_truth_dir: data/ground_truth
+  ocr_prediction_dir: artifacts/ocr_text_cleaning
+  output_dir: artifacts/evaluation
+  ocr_prediction_text_field: original_full_text
+  ocr_prediction_fallback_fields: [
+      "cleaned_full_text",
+      "full_text",
+  ]
+  allow_prediction_text_fallback: True
+  text_field_in_ground_truth: "full_text"
+  case_sensitive: False
+  normalize_whitespace: True
+  remove_punctuation_for_text_eval: False
+  strict_string_matching: True
+  string_similarity_threshold: 0.95
+  amount_tolerance: 0.01
+  item_price_tolerance: 0.01
+  item_name_similarity_threshold: 0.80
+  normalize_dates: True
+  date_order: "DMY"
+  cer_warning_threshold: 0.20
+  wer_warning_threshold: 0.30
+  item_f1_warning_threshold: 0.70
+  confidence_bin_count: 10
+  quality_gate_enabled: False
+  max_corpus_cer: 0.20
+  max_corpus_wer: 0.30
+  min_store_accuracy: 0.90
+  min_date_accuracy: 0.90
+  min_total_accuracy: 0.95
+  min_item_f1: 0.85
+  save_detailed_results: True
+  save_csv: True
+  save_json: True  

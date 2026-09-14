@@ -170,4 +170,40 @@ class FinancialSummaryConfig:
     save_audit_table: bool 
     save_csv: bool 
     save_json: bool 
-    schema_version: str        
+    schema_version: str    
+
+@dataclass(frozen=True)
+class EvaluationConfig:
+    root_dir : Path
+    prediction_dir: Path
+    ground_truth_dir: Path
+    ocr_prediction_dir: Path
+    output_dir: Path
+    ocr_prediction_text_field: str 
+    ocr_prediction_fallback_fields: tuple[str, ...]
+    allow_prediction_text_fallback: bool
+    text_field_in_ground_truth: str 
+    case_sensitive: bool
+    normalize_whitespace: bool
+    remove_punctuation_for_text_eval: bool 
+    strict_string_matching: bool 
+    string_similarity_threshold: float
+    amount_tolerance: float
+    item_price_tolerance: float 
+    item_name_similarity_threshold: float 
+    normalize_dates: bool 
+    date_order: str 
+    cer_warning_threshold: float
+    wer_warning_threshold: float 
+    item_f1_warning_threshold: float 
+    confidence_bin_count: int
+    quality_gate_enabled: bool
+    max_corpus_cer: float | None
+    max_corpus_wer: float | None
+    min_store_accuracy: float | None
+    min_date_accuracy: float | None 
+    min_total_accuracy: float | None
+    min_item_f1: float | None
+    save_detailed_results: bool
+    save_csv: bool
+    save_json: bool        
