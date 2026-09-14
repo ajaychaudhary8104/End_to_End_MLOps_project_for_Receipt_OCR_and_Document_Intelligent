@@ -1,1 +1,5 @@
 # End_to_End_MLOps_project_for_Receipt_OCR_and_Document_Intelligent
+
+set MLFLOW_TRACKING_URI=https://dagshub.com/ajaychaudhary8104/End_to_End_MLOps_project_for_Receipt_OCR_and_Document_Intelligent.mlflow
+set MLFLOW_TRACKING_USERNAME=ajaychaudhary8104
+set MLFLOW_TRACKING_PASSWORD=gangapur8955

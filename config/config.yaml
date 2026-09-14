@@ -209,3 +209,41 @@ evaluation:
   save_detailed_results: True
   save_csv: True
   save_json: True  
+
+experiment_tracking_with_mlflow:
+  root_dir: artifacts/mlflow
+  tracking_uri: https://dagshub.com/ajaychaudhary8104/End_to_End_MLOps_project_for_Receipt_OCR_and_Document_Intelligent.mlflow
+  experiment_name: receipt_ocr_pipeline
+  artifact_location: artifacts/mlflow
+  run_name_prefix: receipt-ocr
+  local_summary_dir: artifacts/mlflow/runs
+  local_artifact_dir: artifacts/mlflow
+  log_system_metrics: True
+  save_local_run_summary: True
+  log_environment: True
+  log_git_metadata: True
+  log_python_metadata: True
+  log_mlflow_metadata: True
+  allow_existing_active_run: False
+  max_param_length: 500
+  max_tag_length: 5000
+  max_metric_count: 500
+  hash_dataset_files: True
+  strict_metric_validation: True
+  strict_parameter_validation: True
+  strict_tag_validation: True
+  secret_key_patterns: [
+      "password",
+      "passwd",
+      "pwd",
+      "secret",
+      "token",
+      "api_key",
+      "apikey",
+      "access_key",
+      "private_key",
+      "client_secret",
+      "authorization",
+      "credential",
+      "credentials",
+  ]

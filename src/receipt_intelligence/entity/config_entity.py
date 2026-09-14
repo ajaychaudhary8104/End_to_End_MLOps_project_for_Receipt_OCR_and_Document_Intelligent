@@ -206,4 +206,29 @@ class EvaluationConfig:
     min_item_f1: float | None
     save_detailed_results: bool
     save_csv: bool
-    save_json: bool        
+    save_json: bool     
+
+@dataclass(frozen=True)
+class MLflowConfig:
+    root_dir: Path
+    tracking_uri: str
+    experiment_name: str 
+    artifact_location: str 
+    run_name_prefix: str 
+    local_summary_dir: str 
+    local_artifact_dir: str 
+    log_system_metrics: bool 
+    save_local_run_summary: bool 
+    log_environment: bool
+    log_git_metadata: bool 
+    log_python_metadata: bool
+    log_mlflow_metadata: bool 
+    allow_existing_active_run: bool 
+    max_param_length: int
+    max_tag_length: int 
+    max_metric_count: int 
+    hash_dataset_files: bool 
+    strict_metric_validation: bool 
+    strict_parameter_validation: bool 
+    strict_tag_validation: bool 
+    secret_key_patterns: tuple[str, ...]        

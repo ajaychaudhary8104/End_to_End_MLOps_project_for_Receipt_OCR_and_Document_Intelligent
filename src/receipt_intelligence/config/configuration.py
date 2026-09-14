@@ -4,7 +4,8 @@ from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, 
                                                             ImagePreprocessingConfig, OCREngineConfig,
                                                             TextCleaningConfig, FieldExtractionConfig,
                                                               ConfidenceEngineConfig ,JSONGeneratorConfig,
-                                                              FinancialSummaryConfig, EvaluationConfig)
+                                                              FinancialSummaryConfig, EvaluationConfig,
+                                                              MLflowConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -296,3 +297,37 @@ class ConfigurationManager:
             save_csv=config.save_csv,
             save_json=config.save_json,
         )
+
+    def get_mlflow_config(self) -> MLflowConfig:
+        config = self.config.experiment_tracking_with_mlflow
+
+        create_directories([
+            config.root_dir,
+            config.local_summary_dir,
+            config.local_artifact_dir,
+        ])
+
+        return MLflowConfig(
+            root_dir=config.root_dir,
+            tracking_uri=config.tracking_uri,
+            experiment_name=config.experiment_name,
+            artifact_location=config.artifact_location,
+            run_name_prefix=config.run_name_prefix,
+            local_summary_dir=config.local_summary_dir,
+            local_artifact_dir=config.local_artifact_dir,
+            log_system_metrics=config.log_system_metrics,
+            save_local_run_summary=config.save_local_run_summary,
+            log_environment=config.log_environment,
+            log_git_metadata=config.log_git_metadata,
+            log_python_metadata=config.log_python_metadata,
+            log_mlflow_metadata=config.log_mlflow_metadata,
+            allow_existing_active_run=config.allow_existing_active_run,
+            max_param_length=config.max_param_length,
+            max_tag_length=config.max_tag_length,
+            max_metric_count=config.max_metric_count,
+            hash_dataset_files=config.hash_dataset_files,
+            strict_metric_validation=config.strict_metric_validation,
+            strict_parameter_validation=config.strict_parameter_validation,
+            strict_tag_validation=config.strict_tag_validation,
+            secret_key_patterns=tuple(config.secret_key_patterns),
+        )  
