@@ -1,0 +1,125 @@
+stages:
+  data_ingestion:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_01_data_ingestion
+    deps:
+      - src/receipt_intelligence/pipeline/stage_01_data_ingestion.py
+      - src/receipt_intelligence/components/data_ingestion.py
+      - config/config.yaml
+    outs:
+      - artifacts/data_ingestion/data.zip
+      - artifacts/data_ingestion/AI-OCR dataset
+
+  data_validation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_02_data_validation
+    deps:
+      - src/receipt_intelligence/pipeline/stage_02_data_validation.py
+      - src/receipt_intelligence/components/data_validation.py
+      - artifacts/data_ingestion/AI-OCR dataset
+      - config/config.yaml
+    outs:
+      - artifacts/data_validation
+
+  image_preprocessing:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_03_image_preprocessing
+    deps:
+      - src/receipt_intelligence/pipeline/stage_03_image_preprocessing.py
+      - src/receipt_intelligence/components/image_preprocessing.py
+      - artifacts/data_ingestion/AI-OCR dataset
+      - config/config.yaml
+    outs:
+      - artifacts/image_preprocessing/preprocessed_images
+
+  ocr_engine:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_04_ocr_engine
+    deps:
+      - src/receipt_intelligence/pipeline/stage_04_ocr_engine.py
+      - src/receipt_intelligence/components/ocr_engine.py
+      - artifacts/image_preprocessing/preprocessed_images
+      - config/config.yaml
+    outs:
+      - artifacts/ocr_engine/ocr_results
+
+  ocr_text_cleaning:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_05_ocr_text_cleaning
+    deps:
+      - src/receipt_intelligence/pipeline/stage_05_ocr_text_cleaning.py
+      - src/receipt_intelligence/components/ocr_text_cleaning.py
+      - artifacts/ocr_engine/ocr_results
+      - config/config.yaml
+    outs:
+      - artifacts/ocr_text_cleaning
+
+  field_extraction_engine:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_06_field_extraction_engine
+    deps:
+      - src/receipt_intelligence/pipeline/stage_06_field_extraction_engine.py
+      - src/receipt_intelligence/components/field_extraction_engine.py
+      - artifacts/ocr_text_cleaning
+      - config/config.yaml
+    outs:
+      - artifacts/field_extraction_engine/extracted_fields
+
+  confidence_and_reliability_engine:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine
+    deps:
+      - src/receipt_intelligence/pipeline/stage_07_confidence_and_reliability_engine.py
+      - src/receipt_intelligence/components/confindence_and_reliability_engine.py
+      - artifacts/field_extraction_engine/extracted_fields
+      - artifacts/ocr_engine/ocr_results
+      - artifacts/ocr_text_cleaning
+      - config/config.yaml
+    outs:
+      - artifacts/confidence_and_reliability_engine
+
+  json_generation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_08_json_generation
+    deps:
+      - src/receipt_intelligence/pipeline/stage_08_json_generation.py
+      - src/receipt_intelligence/components/json_generation.py
+      - artifacts/confidence_and_reliability_engine
+      - config/config.yaml
+    outs:
+      - artifacts/json_generation/json_output
+
+  financial_summary:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_09_financial_summary
+    deps:
+      - src/receipt_intelligence/pipeline/stage_09_financial_summary.py
+      - src/receipt_intelligence/components/financial_summary.py
+      - artifacts/json_generation/json_output
+      - config/config.yaml
+    outs:
+      - artifacts/financial_summary
+
+  evaluation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_10_evaluation
+    deps:
+      - src/receipt_intelligence/pipeline/stage_10_evaluation.py
+      - src/receipt_intelligence/components/evaluation.py
+      - artifacts/json_generation/json_output
+      - artifacts/ocr_text_cleaning
+      - data/ground_truth
+      - config/config.yaml
+    outs:
+      - artifacts/evaluation
+
+  experiment_tracking_with_mlflow:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_11_experiment_tracking_with_mlflow
+    deps:
+      - src/receipt_intelligence/pipeline/stage_11_experiment_tracking_with_mlflow.py
+      - src/receipt_intelligence/components/experiment_tracking_with_mlflow.py
+      - artifacts/data_ingestion/AI-OCR dataset
+      - artifacts/evaluation
+      - config/config.yaml
+    outs:
+      - artifacts/mlflow/runs
+
+  inference:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_12_inference
+    deps:
+      - src/receipt_intelligence/pipeline/stage_12_inference.py
+      - src/receipt_intelligence/components/inference.py
+      - data/inference
+      - config/config.yaml
+    outs:
+      - artifacts/inference/predictions.json

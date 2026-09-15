@@ -1,0 +1,346 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_01_data_ingestion
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/data_ingestion.py
+      hash: md5
+      md5: 1b6d4a7619a61dc90d756cc8ab8ea255
+      size: 15927
+    - path: src/receipt_intelligence/pipeline/stage_01_data_ingestion.py
+      hash: md5
+      md5: 94c30a87b7424961c661f0d06402cea1
+      size: 888
+    outs:
+    - path: artifacts/data_ingestion/AI-OCR dataset
+      hash: md5
+      md5: b2ddf0902d07b3c2a8a28d84e2babe52.dir
+      size: 13190903
+      nfiles: 19
+    - path: artifacts/data_ingestion/data.zip
+      hash: md5
+      md5: 9ae060adcafd0f048a575ad1374aac1b
+      size: 12302347
+  data_validation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_02_data_validation
+    deps:
+    - path: artifacts/data_ingestion/AI-OCR dataset
+      hash: md5
+      md5: b2ddf0902d07b3c2a8a28d84e2babe52.dir
+      size: 13190903
+      nfiles: 19
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/data_validation.py
+      hash: md5
+      md5: f0fb5aecc6768b572e35a75dee9145a4
+      size: 22633
+    - path: src/receipt_intelligence/pipeline/stage_02_data_validation.py
+      hash: md5
+      md5: f5ecf50a256be2010ea2de00a155a57c
+      size: 1053
+    outs:
+    - path: artifacts/data_validation
+      hash: md5
+      md5: c6d0bbd822ccf887df452099a8afe1d6.dir
+      size: 13447
+      nfiles: 1
+  image_preprocessing:
+    cmd: python -m 
+      src.receipt_intelligence.pipeline.stage_03_image_preprocessing
+    deps:
+    - path: artifacts/data_ingestion/AI-OCR dataset
+      hash: md5
+      md5: b2ddf0902d07b3c2a8a28d84e2babe52.dir
+      size: 13190903
+      nfiles: 19
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/image_preprocessing.py
+      hash: md5
+      md5: 1db0fa70272f33d0c34ba17aef697622
+      size: 31495
+    - path: src/receipt_intelligence/pipeline/stage_03_image_preprocessing.py
+      hash: md5
+      md5: 09057f99a8cf5169e700f11aed4eb330
+      size: 1103
+    outs:
+    - path: artifacts/image_preprocessing/preprocessed_images
+      hash: md5
+      md5: 1c432e610f3c951e9b266789a79ed147.dir
+      size: 8635747
+      nfiles: 20
+  ocr_engine:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_04_ocr_engine
+    deps:
+    - path: artifacts/image_preprocessing/preprocessed_images
+      hash: md5
+      md5: 1c432e610f3c951e9b266789a79ed147.dir
+      size: 8635747
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/ocr_engine.py
+      hash: md5
+      md5: 7fbec678e4225f264607e1cd7b95fc1d
+      size: 35702
+    - path: src/receipt_intelligence/pipeline/stage_04_ocr_engine.py
+      hash: md5
+      md5: 057ca2669d42de632ed01b952f582470
+      size: 994
+    outs:
+    - path: artifacts/ocr_engine/ocr_results
+      hash: md5
+      md5: 789ff3fac09699a84bbda502da2833a2.dir
+      size: 1296830
+      nfiles: 20
+  ocr_text_cleaning:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_05_ocr_text_cleaning
+    deps:
+    - path: artifacts/ocr_engine/ocr_results
+      hash: md5
+      md5: 789ff3fac09699a84bbda502da2833a2.dir
+      size: 1296830
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/ocr_text_cleaning.py
+      hash: md5
+      md5: f642d2f55787f90e2379ba095517af0e
+      size: 34986
+    - path: src/receipt_intelligence/pipeline/stage_05_ocr_text_cleaning.py
+      hash: md5
+      md5: 0686b8a4abe2a15932e57b5fc1fd3f88
+      size: 1061
+    outs:
+    - path: artifacts/ocr_text_cleaning
+      hash: md5
+      md5: 0d6ceefc3e3429f91c299c5b5bce7d8d.dir
+      size: 1461997
+      nfiles: 20
+  field_extraction_engine:
+    cmd: python -m 
+      src.receipt_intelligence.pipeline.stage_06_field_extraction_engine
+    deps:
+    - path: artifacts/ocr_text_cleaning
+      hash: md5
+      md5: 0d6ceefc3e3429f91c299c5b5bce7d8d.dir
+      size: 1461997
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/field_extraction_engine.py
+      hash: md5
+      md5: 66959f7aa92feae6419829f0c7e8a719
+      size: 63418
+    - path: 
+        src/receipt_intelligence/pipeline/stage_06_field_extraction_engine.py
+      hash: md5
+      md5: 94be156c643fab656c0c9476d4fa8be3
+      size: 1068
+    outs:
+    - path: artifacts/field_extraction_engine/extracted_fields
+      hash: md5
+      md5: a9026914b5912479ac1fbb0120fb52f4.dir
+      size: 110006
+      nfiles: 20
+  confidence_and_reliability_engine:
+    cmd: python -m 
+      src.receipt_intelligence.pipeline.stage_07_confidence_and_reliability_engine
+    deps:
+    - path: artifacts/field_extraction_engine/extracted_fields
+      hash: md5
+      md5: a9026914b5912479ac1fbb0120fb52f4.dir
+      size: 110006
+      nfiles: 20
+    - path: artifacts/ocr_engine/ocr_results
+      hash: md5
+      md5: 789ff3fac09699a84bbda502da2833a2.dir
+      size: 1296830
+      nfiles: 20
+    - path: artifacts/ocr_text_cleaning
+      hash: md5
+      md5: 0d6ceefc3e3429f91c299c5b5bce7d8d.dir
+      size: 1461997
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: 
+        src/receipt_intelligence/components/confindence_and_reliability_engine.py
+      hash: md5
+      md5: 6b83c1794efe54692bd3c7facfe8f453
+      size: 77641
+    - path: 
+        src/receipt_intelligence/pipeline/stage_07_confidence_and_reliability_engine.py
+      hash: md5
+      md5: 96141490dbe756b1fbfa846fc2166bc8
+      size: 1145
+    outs:
+    - path: artifacts/confidence_and_reliability_engine
+      hash: md5
+      md5: 3a29c47dc6a7df5a5623638625ad7748.dir
+      size: 64518
+      nfiles: 20
+  json_generation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_08_json_generation
+    deps:
+    - path: artifacts/confidence_and_reliability_engine
+      hash: md5
+      md5: 3a29c47dc6a7df5a5623638625ad7748.dir
+      size: 64518
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/json_generation.py
+      hash: md5
+      md5: bf339e95bbc1f83e21f0b1b5bd8c6599
+      size: 77780
+    - path: src/receipt_intelligence/pipeline/stage_08_json_generation.py
+      hash: md5
+      md5: 105df537738f93d71621713fb93c0c64
+      size: 1040
+    outs:
+    - path: artifacts/json_generation/json_output
+      hash: md5
+      md5: 28c38b529b99f2c4ba870a6c671cef1e.dir
+      size: 55742
+      nfiles: 20
+  financial_summary:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_09_financial_summary
+    deps:
+    - path: artifacts/json_generation/json_output
+      hash: md5
+      md5: 28c38b529b99f2c4ba870a6c671cef1e.dir
+      size: 55742
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: src/receipt_intelligence/components/financial_summary.py
+      hash: md5
+      md5: b00cf50231f33259e0a555d20d53aa60
+      size: 83483
+    - path: src/receipt_intelligence/pipeline/stage_09_financial_summary.py
+      hash: md5
+      md5: bbe9a1a59469d6deb405adb78cd02247
+      size: 1081
+    outs:
+    - path: artifacts/financial_summary
+      hash: md5
+      md5: 80a56830f5d4229645ae6e129ae1b41c.dir
+      size: 9134
+      nfiles: 5
+  evaluation:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_10_evaluation
+    deps:
+    - path: artifacts/json_generation/json_output
+      hash: md5
+      md5: 28c38b529b99f2c4ba870a6c671cef1e.dir
+      size: 55742
+      nfiles: 20
+    - path: artifacts/ocr_text_cleaning
+      hash: md5
+      md5: 0d6ceefc3e3429f91c299c5b5bce7d8d.dir
+      size: 1461997
+      nfiles: 20
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: data/ground_truth
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
+    - path: src/receipt_intelligence/components/evaluation.py
+      hash: md5
+      md5: 7dd67e1589591300a438ea895dd44884
+      size: 127768
+    - path: src/receipt_intelligence/pipeline/stage_10_evaluation.py
+      hash: md5
+      md5: 2a69b93f4232f165fb1cbc77a8f1a678
+      size: 1011
+    outs:
+    - path: artifacts/evaluation
+      hash: md5
+      md5: 526629c5ca4b2462dc61490fe1104ced.dir
+      size: 45459
+      nfiles: 3
+  experiment_tracking_with_mlflow:
+    cmd: python -m 
+      src.receipt_intelligence.pipeline.stage_11_experiment_tracking_with_mlflow
+    deps:
+    - path: artifacts/data_ingestion/AI-OCR dataset
+      hash: md5
+      md5: b2ddf0902d07b3c2a8a28d84e2babe52.dir
+      size: 13190903
+      nfiles: 19
+    - path: artifacts/evaluation
+      hash: md5
+      md5: 677f2889d565ccd4e144e9c0a875cf3b.dir
+      size: 45468
+      nfiles: 3
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: 
+        src/receipt_intelligence/components/experiment_tracking_with_mlflow.py
+      hash: md5
+      md5: 41ff37ad941d162346fbcfb10a2fa6d2
+      size: 55896
+    - path: 
+        src/receipt_intelligence/pipeline/stage_11_experiment_tracking_with_mlflow.py
+      hash: md5
+      md5: 0bc3c348b7bca242d77afaafc3f8592f
+      size: 889
+    outs:
+    - path: artifacts/mlflow/runs
+      hash: md5
+      md5: ccc4469b870d2ae3c2d539c5d64c2753.dir
+      size: 4980
+      nfiles: 1
+  inference:
+    cmd: python -m src.receipt_intelligence.pipeline.stage_12_inference
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: 0e4354741cb525bbbf926eabeca5e69b
+      size: 7703
+    - path: data/inference
+      hash: md5
+      md5: ba83663cd81fb91f3faca9799caf0d24.dir
+      size: 1436483
+      nfiles: 5
+    - path: src/receipt_intelligence/components/inference.py
+      hash: md5
+      md5: 33b81df95757f08d7bb9d37b8190ccc3
+      size: 38548
+    - path: src/receipt_intelligence/pipeline/stage_12_inference.py
+      hash: md5
+      md5: 03d5fd8a255524f355138cd8bdbc6ab6
+      size: 1056
+    outs:
+    - path: artifacts/inference/predictions.json
+      hash: md5
+      md5: cbe53b9d20464581d5ac7d67e39731fb
+      size: 21455
