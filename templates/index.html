@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <meta
+        name="description"
+        content="Receipt OCR and Document Intelligent Extraction dashboard"
+    >
+    <meta name="theme-color" content="#0b1220">
+
+    <title>Receipt OCR Intelligence</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <header class="topbar">
+
+            <div class="brand">
+
+                <div
+                    class="brand-mark"
+                    aria-hidden="true"
+                >
+                    R
+                </div>
+
+                <div>
+
+                    <h1>
+                        Receipt OCR Intelligence
+                    </h1>
+
+                    <p>
+                        Document intelligent extraction
+                        &amp; reliability dashboard
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="topbar-actions">
+
+                <div
+                    class="service-status"
+                    id="serviceStatus"
+                >
+                    <span
+                        class="status-dot status-unknown"
+                    ></span>
+
+                    <span class="status-text">
+                        Checking service...
+                    </span>
+                </div>
+
+                <a
+                    class="button button-secondary"
+                    href="/api/docs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    API Docs
+                </a>
+
+            </div>
+
+        </header>
+
+        <main class="main-content">
+
+            <section class="hero-section">
+
+                <div class="hero-copy">
+
+                    <span class="eyebrow">
+                        PRODUCTION INFERENCE
+                    </span>
+
+                    <h2>
+                        Turn receipt images into
+                        trusted structured data.
+                    </h2>
+
+                    <p>
+                        Upload a receipt and run the
+                        complete pipeline:
+                        preprocessing, OCR, text cleaning,
+                        field extraction,
+                        confidence &amp; reliability scoring,
+                        and JSON generation.
+                    </p>
+
+                </div>
+
+                <div class="pipeline-card">
+
+                    <div class="pipeline-step">
+                        <span class="pipeline-index">
+                            01
+                        </span>
+
+                        <span>
+                            Preprocess
+                        </span>
+                    </div>
+
+                    <span class="pipeline-arrow">
+                        →
+                    </span>
+
+                    <div class="pipeline-step">
+                        <span class="pipeline-index">
+                            02
+                        </span>
+
+                        <span>
+                            OCR
+                        </span>
+                    </div>
+
+                    <span class="pipeline-arrow">
+                        →
+                    </span>
+
+                    <div class="pipeline-step">
+                        <span class="pipeline-index">
+                            03
+                        </span>
+
+                        <span>
+                            Extract
+                        </span>
+                    </div>
+
+                    <span class="pipeline-arrow">
+                        →
+                    </span>
+
+                    <div class="pipeline-step">
+                        <span class="pipeline-index">
+                            04
+                        </span>
+
+                        <span>
+                            Validate
+                        </span>
+                    </div>
+
+                    <span class="pipeline-arrow">
+                        →
+                    </span>
+
+                    <div class="pipeline-step">
+                        <span class="pipeline-index">
+                            05
+                        </span>
+
+                        <span>
+                            JSON
+                        </span>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="dashboard-grid">
+
+                <div class="card upload-card">
+
+                    <div class="card-header">
+
+                        <div>
+                            <p class="card-kicker">
+                                INPUT
+                            </p>
+
+                            <h3>
+                                Receipt inference
+                            </h3>
+                        </div>
+
+                        <span class="badge">
+                            IMAGE
+                        </span>
+
+                    </div>
+
+                    <div
+                        class="drop-zone"
+                        id="dropZone"
+                        tabindex="0"
+                        role="button"
+                        aria-label="Upload receipt image"
+                    >
+
+                        <div
+                            class="drop-icon"
+                            aria-hidden="true"
+                        >
+                            ↑
+                        </div>
+
+                        <h4>
+                            Drop a receipt image here
+                        </h4>
+
+                        <p>
+                            or choose a file from your device
+                        </p>
+
+                        <button
+                            type="button"
+                            class="button button-primary"
+                            id="chooseFileButton"
+                        >
+                            Choose receipt
+                        </button>
+
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".jpg,.jpeg,.png,.bmp,.tif,.tiff,.webp,image/jpeg,image/png,image/bmp,image/tiff,image/webp"
+                            hidden
+                        >
+
+                        <small>
+                            JPG, JPEG, PNG, BMP, TIFF, WEBP
+                            · Max 25 MB
+                        </small>
+
+                    </div>
+
+                    <div
+                        class="selected-file hidden"
+                        id="selectedFile"
+                    >
+
+                        <div class="file-preview">
+
+                            <img
+                                id="previewImage"
+                                alt="Selected receipt preview"
+                            >
+
+                        </div>
+
+                        <div class="file-details">
+
+                            <strong
+                                id="fileName"
+                            >
+                                No file selected
+                            </strong>
+
+                            <span
+                                id="fileMeta"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="icon-button"
+                            id="removeFileButton"
+                            aria-label="Remove selected receipt"
+                            title="Remove file"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="progress-section hidden"
+                        id="progressSection"
+                    >
+
+                        <div class="progress-label">
+
+                            <span
+                                id="progressText"
+                            >
+                                Processing receipt...
+                            </span>
+
+                            <span
+                                id="progressPercent"
+                            >
+                                0%
+                            </span>
+
+                        </div>
+
+                        <div class="progress-track">
+
+                            <div
+                                class="progress-bar"
+                                id="progressBar"
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="button button-primary button-full"
+                        id="processButton"
+                        disabled
+                    >
+                        Run extraction
+                    </button>
+
+                    <div
+                        class="alert hidden"
+                        id="errorAlert"
+                        role="alert"
+                    ></div>
+
+                </div>
+
+                <div class="card health-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <p class="card-kicker">
+                                SYSTEM
+                            </p>
+
+                            <h3>
+                                Service health
+                            </h3>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="icon-button"
+                            id="refreshHealthButton"
+                            aria-label="Refresh service health"
+                            title="Refresh health"
+                        >
+                            ↻
+                        </button>
+
+                    </div>
+
+                    <div class="health-summary">
+
+                        <div
+                            class="health-ring health-unknown"
+                            id="healthRing"
+                        >
+
+                            <span
+                                id="healthRingText"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+                        <div>
+
+                            <div
+                                class="health-status"
+                                id="healthStatus"
+                            >
+                                Checking...
+                            </div>
+
+                            <p
+                                class="muted"
+                                id="healthDescription"
+                            >
+                                Verifying inference pipeline
+                                readiness.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="stats-list">
+
+                        <div class="stat-row">
+
+                            <span>
+                                Pipeline
+                            </span>
+
+                            <strong
+                                id="pipelineReady"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="stat-row">
+
+                            <span>
+                                Model loaded
+                            </span>
+
+                            <strong
+                                id="modelLoaded"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="stat-row">
+
+                            <span>
+                                API version
+                            </span>
+
+                            <strong
+                                id="apiVersion"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="stat-row">
+
+                            <span>
+                                Model path
+                            </span>
+
+                            <strong
+                                class="truncate"
+                                id="modelPath"
+                                title=""
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="results-section">
+
+                <div class="card result-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <p class="card-kicker">
+                                OUTPUT
+                            </p>
+
+                            <h3>
+                                Structured receipt
+                            </h3>
+
+                        </div>
+
+                        <div class="result-actions">
+
+                            <button
+                                type="button"
+                                class="button button-secondary"
+                                id="copyJsonButton"
+                                disabled
+                            >
+                                Copy JSON
+                            </button>
+
+                            <button
+                                type="button"
+                                class="button button-secondary"
+                                id="downloadJsonButton"
+                                disabled
+                            >
+                                Download JSON
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="empty-state"
+                        id="emptyState"
+                    >
+
+                        <div
+                            class="empty-icon"
+                            aria-hidden="true"
+                        >
+                            { }
+                        </div>
+
+                        <h4>
+                            No prediction yet
+                        </h4>
+
+                        <p>
+                            Upload a receipt to view
+                            extracted fields, confidence
+                            signals, and the final
+                            structured JSON.
+                        </p>
+
+                    </div>
+
+                    <div
+                        class="result-content hidden"
+                        id="resultContent"
+                    >
+
+                        <div class="result-overview">
+
+                            <div class="overview-card">
+
+                                <span
+                                    class="overview-label"
+                                >
+                                    Receipt ID
+                                </span>
+
+                                <strong
+                                    id="resultReceiptId"
+                                >
+                                    —
+                                </strong>
+
+                            </div>
+
+                            <div class="overview-card">
+
+                                <span
+                                    class="overview-label"
+                                >
+                                    Processing time
+                                </span>
+
+                                <strong
+                                    id="resultProcessingTime"
+                                >
+                                    —
+                                </strong>
+
+                            </div>
+
+                            <div class="overview-card">
+
+                                <span
+                                    class="overview-label"
+                                >
+                                    Reliability
+                                </span>
+
+                                <strong
+                                    id="resultReliability"
+                                >
+                                    —
+                                </strong>
+
+                            </div>
+
+                            <div class="overview-card">
+
+                                <span
+                                    class="overview-label"
+                                >
+                                    Review required
+                                </span>
+
+                                <strong
+                                    id="resultReview"
+                                >
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                        <div class="result-grid">
+
+                            <div class="result-panel">
+
+                                <div class="panel-header">
+
+                                    <h4>
+                                        Extracted fields
+                                    </h4>
+
+                                    <span
+                                        class="badge"
+                                        id="fieldCountBadge"
+                                    >
+                                        0 fields
+                                    </span>
+
+                                </div>
+
+                                <div
+                                    class="fields-container"
+                                    id="fieldsContainer"
+                                ></div>
+
+                            </div>
+
+                            <div class="result-panel">
+
+                                <div class="panel-header">
+
+                                    <h4>
+                                        JSON response
+                                    </h4>
+
+                                    <span class="badge">
+                                        RAW
+                                    </span>
+
+                                </div>
+
+                                <pre
+                                    class="json-viewer"
+                                    id="jsonViewer"
+                                ></pre>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="info-grid">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <p class="card-kicker">
+                                PIPELINE
+                            </p>
+
+                            <h3>
+                                Quality signals
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <div class="quality-grid">
+
+                        <div class="quality-item">
+
+                            <span>
+                                OCR confidence
+                            </span>
+
+                            <strong id="qualityOcr">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="quality-item">
+
+                            <span>
+                                Pattern confidence
+                            </span>
+
+                            <strong id="qualityPattern">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="quality-item">
+
+                            <span>
+                                Context confidence
+                            </span>
+
+                            <strong id="qualityContext">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="quality-item">
+
+                            <span>
+                                Overall confidence
+                            </span>
+
+                            <strong id="qualityOverall">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <p class="card-kicker">
+                                FINANCIAL
+                            </p>
+
+                            <h3>
+                                Receipt totals
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+                    <div class="financial-grid">
+
+                        <div class="financial-item">
+
+                            <span>
+                                Items
+                            </span>
+
+                            <strong
+                                id="financialItems"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="financial-item">
+
+                            <span>
+                                Expected items
+                            </span>
+
+                            <strong
+                                id="financialExpectedItems"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="financial-item">
+
+                            <span>
+                                Item sum
+                            </span>
+
+                            <strong
+                                id="financialItemSum"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                        <div class="financial-item">
+
+                            <span>
+                                Total amount
+                            </span>
+
+                            <strong
+                                id="financialTotal"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+        <footer class="footer">
+
+            <span>
+                Receipt OCR &amp; Document Intelligent Extraction
+            </span>
+
+            <span>
+                Production inference interface
+            </span>
+
+        </footer>
+
+    </div>
+
+    <div
+        class="toast-container"
+        id="toastContainer"
+        aria-live="polite"
+        aria-atomic="true"
+    ></div>
+
+    <script
+        src="/static/app.js"
+        defer
+    ></script>
+
+</body>
+</html>
