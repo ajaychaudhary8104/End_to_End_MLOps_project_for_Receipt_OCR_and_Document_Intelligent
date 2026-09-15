@@ -247,3 +247,29 @@ experiment_tracking_with_mlflow:
       "credential",
       "credentials",
   ]
+
+inference:
+  root_dir: artifacts/inference
+  input_dir: data/inference
+  output_dir: artifacts/inference
+
+  recursive: false
+  continue_on_error: true
+
+  save_predictions: true
+  prediction_filename: "predictions.json"
+
+  supported_extensions:
+    - ".jpg"
+    - ".jpeg"
+    - ".png"
+    - ".bmp"
+    - ".tif"
+    - ".tiff"
+    - ".webp"
+
+  enable_mlflow: false
+  mlflow_run_name: "receipt-ocr-inference"
+
+  create_output_directory: true
+  overwrite_predictions: true  

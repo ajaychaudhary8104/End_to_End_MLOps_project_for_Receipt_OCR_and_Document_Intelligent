@@ -10,6 +10,7 @@ from src.receipt_intelligence.pipeline.stage_08_json_generation import JSONGener
 from src.receipt_intelligence.pipeline.stage_09_financial_summary import FinancialSummaryPipeline
 from src.receipt_intelligence.pipeline.stage_10_evaluation import EvaluationPipeline
 from src.receipt_intelligence.pipeline.stage_11_experiment_tracking_with_mlflow import MLFlowTrackerPipeline
+from src.receipt_intelligence.pipeline.stage_12_inference import InferencePipeline
 import warnings
 
 warnings.filterwarnings(
@@ -129,6 +130,16 @@ try:
    logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
    tracker = MLFlowTrackerPipeline()
    tracker.main()
+   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+except Exception as e:
+   logger.exception(e)
+   raise e   
+
+STAGE_NAME = "Inference stage"
+try:
+   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+   inference = InferencePipeline()
+   inference.main()
    logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
 except Exception as e:
    logger.exception(e)

@@ -5,7 +5,7 @@ from src.receipt_intelligence.entity.config_entity import (DataIngestionConfig, 
                                                             TextCleaningConfig, FieldExtractionConfig,
                                                               ConfidenceEngineConfig ,JSONGeneratorConfig,
                                                               FinancialSummaryConfig, EvaluationConfig,
-                                                              MLflowConfig)
+                                                              MLflowConfig, InferenceConfig)
 
 class ConfigurationManager:
     def __init__(self, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -331,3 +331,28 @@ class ConfigurationManager:
             strict_tag_validation=config.strict_tag_validation,
             secret_key_patterns=tuple(config.secret_key_patterns),
         )  
+
+    def get_inference_config(self,) -> InferenceConfig:
+            config = self.config.inference
+            create_directories([config.root_dir, config.output_dir])
+            
+            return InferenceConfig(
+                root_dir=config.root_dir,
+                input_dir=config.input_dir,
+                output_dir=config.output_dir,
+                recursive=config.recursive,
+                continue_on_error=config.continue_on_error,
+                save_predictions=config.save_predictions,
+                prediction_filename=config.prediction_filename,
+                supported_extensions=tuple(
+                    config.supported_extensions
+                ),
+                enable_mlflow=config.enable_mlflow,
+                mlflow_run_name=config.mlflow_run_name,
+                create_output_directory=(
+                    config.create_output_directory
+                ),
+                overwrite_predictions=(
+                    config.overwrite_predictions
+                ),
+            )    

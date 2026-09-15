@@ -231,4 +231,19 @@ class MLflowConfig:
     strict_metric_validation: bool 
     strict_parameter_validation: bool 
     strict_tag_validation: bool 
-    secret_key_patterns: tuple[str, ...]        
+    secret_key_patterns: tuple[str, ...] 
+
+@dataclass(frozen=True)
+class InferenceConfig:
+    root_dir: Path
+    input_dir: Path
+    output_dir: Path
+    recursive: bool 
+    continue_on_error: bool
+    save_predictions: bool 
+    prediction_filename: str
+    supported_extensions: tuple[str, ...]
+    enable_mlflow: bool 
+    mlflow_run_name: str
+    create_output_directory: bool 
+    overwrite_predictions: bool            
