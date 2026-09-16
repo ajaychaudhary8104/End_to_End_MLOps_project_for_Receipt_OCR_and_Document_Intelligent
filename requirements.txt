@@ -88,6 +88,10 @@ awscli==1.33.13
 # =========================
 feast>=0.38.0,<0.45.0
 
+pytest
+pytest-cov
+httpx
+
 # =========================
 # Local Package Installation
 # =========================
