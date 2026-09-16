@@ -157,7 +157,7 @@ class UploadPredictionResponse(BaseModel):
 
 
 class ServiceInfoResponse(BaseModel):
-
+    success: bool
     service: str
     version: str
     description: str
@@ -425,24 +425,18 @@ async def save_upload_to_temp(
     temp_dir: Path,
 ) -> Path:
 
-    extension = validate_upload(
-        file
-    )
+    extension = validate_upload(file)
 
     safe_name = (
         f"{uuid.uuid4().hex}"
         f"{extension}"
     )
 
-    target_path = (
-        temp_dir / safe_name
-    )
+    target_path = temp_dir / safe_name
 
     total_size = 0
 
-    with target_path.open(
-        "wb"
-    ) as output:
+    with target_path.open("wb") as output:
 
         while True:
 
@@ -453,14 +447,9 @@ async def save_upload_to_temp(
             if not chunk:
                 break
 
-            total_size += len(
-                chunk
-            )
+            total_size += len(chunk)
 
-            if (
-                total_size
-                > MAX_UPLOAD_SIZE_BYTES
-            ):
+            if total_size > MAX_UPLOAD_SIZE_BYTES:
 
                 target_path.unlink(
                     missing_ok=True
@@ -474,13 +463,20 @@ async def save_upload_to_temp(
                     )
                 )
 
-            output.write(
-                chunk
-            )
+            output.write(chunk)
+
+    if total_size == 0:
+
+        target_path.unlink(
+            missing_ok=True
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is empty."
+        )
 
     return target_path
-
-
 # ============================================================
 # LIFESPAN
 # ============================================================
@@ -813,6 +809,7 @@ async def readiness():
 async def service_info():
 
     return ServiceInfoResponse(
+        success=True,
 
         service=(
             "Receipt OCR & "
