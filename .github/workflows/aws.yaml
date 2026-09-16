@@ -16,7 +16,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
@@ -55,11 +54,15 @@ jobs:
 
       - name: Upgrade Packaging Tools
         run: |
-          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade \
+            pip \
+            setuptools \
+            wheel
 
       - name: Install Project Dependencies
         run: |
-          python -m pip install -r requirements.txt
+          python -m pip install \
+            -r requirements.txt
 
       - name: Verify Critical Imports
         run: |
@@ -134,11 +137,18 @@ jobs:
 
           echo "Waiting for container startup..."
 
+          READY=0
+
           for i in {1..30}; do
-            if curl --fail --silent \
+            if curl \
+              --fail \
+              --silent \
+              --show-error \
               http://127.0.0.1:8000/health/live; then
+
               echo
               echo "Application is alive."
+              READY=1
               break
             fi
 
@@ -146,8 +156,19 @@ jobs:
             sleep 5
           done
 
-          curl --fail \
+          if [ "${READY}" -ne 1 ]; then
+            echo "Container failed to become healthy."
+            docker logs receipt-ocr-test
+            exit 1
+          fi
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
             http://127.0.0.1:8000/health
+
+          echo
 
           docker logs receipt-ocr-test
 
@@ -178,14 +199,15 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsReceiptOCR
 
       - name: Verify AWS Identity
         run: |
           aws sts get-caller-identity
-          
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -201,8 +223,10 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+
           echo "image_uri=${IMAGE_URI}" >> "${GITHUB_OUTPUT}"
           echo "IMAGE_URI=${IMAGE_URI}" >> "${GITHUB_ENV}"
+          echo "ECR_REGISTRY=${ECR_REGISTRY}" >> "${GITHUB_ENV}"
 
       - name: Build Docker Image
         run: |
@@ -212,7 +236,7 @@ jobs:
             --tag "${ECR_REGISTRY}/${ECR_REPOSITORY}:latest" \
             .
 
-      - name: Push Commit-SHA Image
+      - name: Push Commit SHA Image
         run: |
           docker push "${IMAGE_URI}"
 
@@ -236,24 +260,30 @@ jobs:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: self-hosted
-    #environment:
-     # name: production
 
     steps:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsReceiptOCRDeploy
+
+      - name: Verify AWS Identity
+        run: |
+          aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set Image URI
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          ACCOUNT_ID=$(aws sts get-caller-identity \
+            --query Account \
+            --output text)
+
           ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
           IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
@@ -267,7 +297,10 @@ jobs:
       - name: Save Existing Deployment
         shell: bash
         run: |
-          if docker ps -a --format '{{.Names}}' | grep -Fxq "${CONTAINER_NAME}"; then
+          if docker ps -a \
+            --format '{{.Names}}' \
+            | grep -Fxq "${CONTAINER_NAME}"; then
+
             echo "Existing container found."
 
             docker inspect \
@@ -277,14 +310,21 @@ jobs:
 
             cat previous-image.txt || true
 
-            docker stop "${CONTAINER_NAME}" || true
+            docker stop \
+              "${CONTAINER_NAME}" \
+              || true
 
             docker rename \
               "${CONTAINER_NAME}" \
-              "${CONTAINER_NAME}-previous" || true
+              "${CONTAINER_NAME}-previous" \
+              || true
+
           else
+
             echo "No existing deployment found."
+
             : > previous-image.txt
+
           fi
 
       - name: Remove Previous Port Owner
@@ -326,19 +366,29 @@ jobs:
 
               echo
               echo "Application is ready."
+
               READY=1
+
               break
 
             fi
 
             echo "Attempt ${i}/30 failed. Retrying..."
+
             sleep 10
 
           done
 
           if [ "${READY}" -ne 1 ]; then
+
             echo "Application failed readiness check."
+
+            docker logs \
+              --tail 300 \
+              "${CONTAINER_NAME}"
+
             exit 1
+
           fi
 
       - name: Verify Production Health
@@ -347,7 +397,7 @@ jobs:
             --fail \
             --silent \
             --show-error \
-            http://127.0.0.1:${HOST_PORT}/health
+            "http://127.0.0.1:${HOST_PORT}/health"
 
           echo
 
@@ -355,7 +405,7 @@ jobs:
             --fail \
             --silent \
             --show-error \
-            http://127.0.0.1:${HOST_PORT}/health/live
+            "http://127.0.0.1:${HOST_PORT}/health/live"
 
           echo
 
@@ -365,13 +415,15 @@ jobs:
             --fail \
             --silent \
             --show-error \
-            http://127.0.0.1:${HOST_PORT}/api/docs \
+            "http://127.0.0.1:${HOST_PORT}/api/docs" \
             > /dev/null
 
       - name: Show Deployment
         run: |
           docker ps
-          docker logs --tail 200 "${CONTAINER_NAME}"
+          docker logs \
+            --tail 200 \
+            "${CONTAINER_NAME}"
 
       # ======================================================
       # AUTOMATIC ROLLBACK
@@ -383,18 +435,28 @@ jobs:
         run: |
           echo "Deployment failed. Starting rollback."
 
-          docker logs --tail 300 "${CONTAINER_NAME}" || true
+          docker logs \
+            --tail 300 \
+            "${CONTAINER_NAME}" \
+            || true
 
-          docker stop "${CONTAINER_NAME}" || true
-          docker rm -f "${CONTAINER_NAME}" || true
+          docker stop \
+            "${CONTAINER_NAME}" \
+            || true
 
-          if [ -f previous-image.txt ] && [ -s previous-image.txt ]; then
+          docker rm -f \
+            "${CONTAINER_NAME}" \
+            || true
+
+          if [ -f previous-image.txt ] \
+            && [ -s previous-image.txt ]; then
 
             PREVIOUS_IMAGE=$(cat previous-image.txt)
 
             echo "Previous image: ${PREVIOUS_IMAGE}"
 
-            docker pull "${PREVIOUS_IMAGE}"
+            docker pull \
+              "${PREVIOUS_IMAGE}"
 
             docker run -d \
               --name "${CONTAINER_NAME}" \
@@ -410,10 +472,12 @@ jobs:
               if curl \
                 --fail \
                 --silent \
-                http://127.0.0.1:${HOST_PORT}/health/ready; then
+                --show-error \
+                "http://127.0.0.1:${HOST_PORT}/health/ready"; then
 
                 echo
                 echo "Rollback successful."
+
                 exit 0
 
               fi
@@ -423,12 +487,17 @@ jobs:
             done
 
             echo "Rollback health check failed."
-            docker logs --tail 300 "${CONTAINER_NAME}"
+
+            docker logs \
+              --tail 300 \
+              "${CONTAINER_NAME}"
+
             exit 1
 
           else
 
             echo "No previous deployment available for rollback."
+
             exit 1
 
           fi
