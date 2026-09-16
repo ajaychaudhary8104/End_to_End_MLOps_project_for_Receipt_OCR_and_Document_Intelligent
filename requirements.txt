@@ -49,6 +49,7 @@ ipython==8.22.2
 # =========================
 fastapi==0.109.2
 starlette==0.36.3
+prometheus_fastapi_instrumentator
 uvicorn[standard]==0.29.0
 pydantic==2.6.4
 python-multipart==0.0.32
@@ -90,4 +91,3 @@ feast>=0.38.0,<0.45.0
 # =========================
 # Local Package Installation
 # =========================
--e .

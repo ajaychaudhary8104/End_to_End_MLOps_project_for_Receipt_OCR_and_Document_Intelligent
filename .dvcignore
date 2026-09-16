@@ -1,3 +1,36 @@
 # Add patterns of files dvc should ignore, which could improve
 # the performance. Learn more at
 # https://dvc.org/doc/user-guide/dvcignore
+.git
+.gitignore
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints
+.pytest_cache
+.mypy_cache
+.vscode
+.idea
+
+notebooks/
+
+artifacts/
+data/
+
+logs/
+
+.env
+.env.*
+
+*.ipynb
+*.csv
+*.zip
+*.tar
+*.tar.gz
+
+Dockerfile
+docker-compose.yml
