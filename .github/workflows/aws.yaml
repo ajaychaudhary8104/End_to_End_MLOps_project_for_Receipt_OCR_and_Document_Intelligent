@@ -271,10 +271,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsReceiptOCRDeploy
 
-      - name: Verify AWS Identity
-        run: |
-          aws sts get-caller-identity
-
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
