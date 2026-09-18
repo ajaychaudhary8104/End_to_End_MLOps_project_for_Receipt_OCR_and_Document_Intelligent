@@ -1,0 +1,28 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: receipt-ocr-cluster
+  region: us-east-1
+
+managedNodeGroups:
+
+  - name: receipt-ocr-workers
+
+    instanceType: t3.medium
+
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 2
+
+    volumeSize: 30
+    volumeType: gp3
+
+    privateNetworking: true
+
+    labels:
+      workload: receipt-ocr
+
+    tags:
+      Project: receipt-ocr
+      Environment: learning

@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: receipt-ocr-api
+  namespace: receipt-ocr
+
+  labels:
+    app: receipt-ocr-api
+
+spec:
+
+  replicas: 1
+
+  strategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+
+  selector:
+    matchLabels:
+      app: receipt-ocr-api
+
+  template:
+
+    metadata:
+      labels:
+        app: receipt-ocr-api
+
+    spec:
+
+      terminationGracePeriodSeconds: 30
+
+      containers:
+
+        - name: receipt-ocr-api
+
+          image: IMAGE_URI_PLACEHOLDER
+
+          imagePullPolicy: Always
+
+          ports:
+
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+
+          env:
+
+            - name: PYTHONUNBUFFERED
+              value: "1"
+
+            - name: HOST
+              value: "0.0.0.0"
+
+            - name: PORT
+              value: "8000"
+
+            - name: LOG_LEVEL
+              value: "info"
+
+          resources:
+
+            requests:
+              cpu: "500m"
+              memory: "2Gi"
+
+            limits:
+              cpu: "1500m"
+              memory: "3Gi"
+
+          startupProbe:
+
+            httpGet:
+              path: /health/live
+              port: 8000
+
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 60
+
+          livenessProbe:
+
+            httpGet:
+              path: /health/live
+              port: 8000
+
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+
+            httpGet:
+              path: /health/ready
+              port: 8000
+
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+            successThreshold: 1
+
+          securityContext:
+
+            allowPrivilegeEscalation: false
+
+            capabilities:
+              drop:
+                - ALL

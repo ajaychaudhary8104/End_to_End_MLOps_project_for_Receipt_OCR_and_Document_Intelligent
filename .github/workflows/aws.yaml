@@ -20,8 +20,9 @@ permissions:
 env:
   AWS_REGION: ${{ vars.AWS_REGION }}
   ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_NAME }}
+  EKS_CLUSTER_NAME: receipt-ocr-cluster
+  KUBERNETES_NAMESPACE: receipt-ocr
   CONTAINER_NAME: receipt-ocr-api
-  HOST_PORT: 8000
   CONTAINER_PORT: 8000
   PYTHON_VERSION: "3.11"
 
@@ -113,6 +114,10 @@ jobs:
             htmlcov/
           if-no-files-found: ignore
 
+      # ======================================================
+      # BUILD IMAGE
+      # ======================================================
+
       - name: Build Docker Image Locally
         run: |
           docker build \
@@ -125,13 +130,15 @@ jobs:
           docker image inspect receipt-ocr-api:${{ github.sha }}
           docker images receipt-ocr-api
 
+      # ======================================================
+      # DOCKER SMOKE TEST
+      # ======================================================
+
       - name: Docker Smoke Test
         run: |
-          docker network create receipt-ocr-test-network
 
           docker run -d \
             --name receipt-ocr-test \
-            --network receipt-ocr-test-network \
             -p 8000:8000 \
             receipt-ocr-api:${{ github.sha }}
 
@@ -140,6 +147,7 @@ jobs:
           READY=0
 
           for i in {1..30}; do
+
             if curl \
               --fail \
               --silent \
@@ -148,19 +156,24 @@ jobs:
 
               echo
               echo "Application is alive."
+
               READY=1
               break
+
             fi
 
             echo "Waiting for application..."
             sleep 5
+
           done
 
           if [ "${READY}" -ne 1 ]; then
-            echo "Container failed to become healthy."
+            echo "Container failed to become alive."
             docker logs receipt-ocr-test
             exit 1
           fi
+
+          echo "Checking application health..."
 
           curl \
             --fail \
@@ -170,22 +183,34 @@ jobs:
 
           echo
 
+          echo "Checking API information..."
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            http://127.0.0.1:8000/api/info
+
+          echo
+
           docker logs receipt-ocr-test
 
       - name: Cleanup Docker Smoke Test
         if: always()
         run: |
           docker rm -f receipt-ocr-test || true
-          docker network rm receipt-ocr-test-network || true
+
 
   # ==========================================================
-  # BUILD AND PUSH
+  # BUILD AND PUSH TO AMAZON ECR
   # ==========================================================
 
   build-and-push:
     name: Build and Push Docker Image
     needs: integration
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
 
     outputs:
@@ -222,14 +247,18 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
+
           IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
 
           echo "image_uri=${IMAGE_URI}" >> "${GITHUB_OUTPUT}"
+
           echo "IMAGE_URI=${IMAGE_URI}" >> "${GITHUB_ENV}"
+
           echo "ECR_REGISTRY=${ECR_REGISTRY}" >> "${GITHUB_ENV}"
 
       - name: Build Docker Image
         run: |
+
           docker build \
             --pull \
             --tag "${IMAGE_URI}" \
@@ -240,7 +269,7 @@ jobs:
         run: |
           docker push "${IMAGE_URI}"
 
-      - name: Update Latest Tag
+      - name: Push Latest Image
         run: |
           docker push \
             "${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
@@ -251,51 +280,33 @@ jobs:
             --repository-name "${ECR_REPOSITORY}" \
             --image-ids imageTag="${GITHUB_SHA}"
 
+
   # ==========================================================
-  # CONTINUOUS DEPLOYMENT
+  # CONTINUOUS DEPLOYMENT TO AMAZON EKS
   # ==========================================================
 
   deployment:
-    name: Deploy Receipt OCR API
+    name: Deploy Receipt OCR API to EKS
+
     needs: build-and-push
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: self-hosted
+
+    runs-on: ubuntu-latest
 
     steps:
 
-      - name: Install AWS CLI
-        shell: bash
-        run: |
-          if command -v aws >/dev/null 2>&1; then
-            echo "AWS CLI already installed."
-            aws --version
-            exit 0
-          fi
+      # ======================================================
+      # CHECKOUT
+      # ======================================================
 
-          echo "Installing AWS CLI..."
+      - name: Checkout Repository
+        uses: actions/checkout@v6
 
-          sudo apt-get update
-          sudo apt-get install -y curl unzip
 
-          curl \
-            "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
-            -o "/tmp/awscliv2.zip"
-
-          rm -rf /tmp/aws
-
-          unzip -q \
-            "/tmp/awscliv2.zip" \
-            -d "/tmp"
-
-          sudo /tmp/aws/install --update
-
-          echo "/usr/local/bin" >> "${GITHUB_PATH}"
-
-          rm -rf \
-            /tmp/aws \
-            /tmp/awscliv2.zip
-
-          aws --version
+      # ======================================================
+      # AWS AUTHENTICATION
+      # ======================================================
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -305,11 +316,97 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsReceiptOCRDeploy
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set Image URI
+      # ======================================================
+      # VERIFY AWS
+      # ======================================================
+
+      - name: Verify AWS Identity
         run: |
+          aws sts get-caller-identity
+
+
+      # ======================================================
+      # VERIFY EKS CLUSTER
+      # ======================================================
+
+      - name: Verify EKS Cluster
+        run: |
+
+          aws eks describe-cluster \
+            --name "${EKS_CLUSTER_NAME}" \
+            --region "${AWS_REGION}" \
+            --query 'cluster.status' \
+            --output text
+
+
+      # ======================================================
+      # INSTALL KUBECTL
+      # ======================================================
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+
+      # ======================================================
+      # CONFIGURE KUBECONFIG
+      # ======================================================
+
+      - name: Configure kubeconfig
+        run: |
+
+          aws eks update-kubeconfig \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
+
+          kubectl cluster-info
+
+          kubectl get nodes
+
+
+      # ======================================================
+      # VERIFY ECR IMAGE
+      # ======================================================
+
+      - name: Verify ECR Image
+        run: |
+
+          ACCOUNT_ID=$(aws sts get-caller-identity \
+            --query Account \
+            --output text)
+
+          ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          IMAGE_URI="${ECR_REGISTRY}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+
+          echo "Deploying image:"
+          echo "${IMAGE_URI}"
+
+          aws ecr describe-images \
+            --repository-name "${ECR_REPOSITORY}" \
+            --image-ids imageTag="${GITHUB_SHA}"
+
+
+      # ======================================================
+      # CREATE NAMESPACE
+      # ======================================================
+
+      - name: Create Kubernetes Namespace
+        run: |
+
+          kubectl apply \
+            -f deployment/eks/namespace.yaml
+
+
+      # ======================================================
+      # CREATE IMAGE URI
+      # ======================================================
+
+      - name: Set Deployment Image
+        run: |
+
           ACCOUNT_ID=$(aws sts get-caller-identity \
             --query Account \
             --output text)
@@ -320,228 +417,171 @@ jobs:
 
           echo "IMAGE_URI=${IMAGE_URI}" >> "${GITHUB_ENV}"
 
-      - name: Pull New Docker Image
-        run: |
-          docker pull "${IMAGE_URI}"
 
-      - name: Save Existing Deployment
+      # ======================================================
+      # DEPLOY APPLICATION
+      # ======================================================
+
+      - name: Deploy Receipt OCR API
+        run: |
+
+          sed \
+            "s|IMAGE_URI_PLACEHOLDER|${IMAGE_URI}|g" \
+            deployment/eks/deployment.yaml \
+            > /tmp/receipt-ocr-deployment.yaml
+
+          kubectl apply \
+            -f /tmp/receipt-ocr-deployment.yaml
+
+
+      # ======================================================
+      # DEPLOY SERVICE
+      # ======================================================
+
+      - name: Deploy Kubernetes Service
+        run: |
+
+          kubectl apply \
+            -f deployment/eks/service.yaml
+
+
+      # ======================================================
+      # SHOW KUBERNETES RESOURCES
+      # ======================================================
+
+      - name: Show Kubernetes Resources
+        run: |
+
+          kubectl get namespace
+
+          kubectl get deployment \
+            -n "${KUBERNETES_NAMESPACE}"
+
+          kubectl get pods \
+            -n "${KUBERNETES_NAMESPACE}"
+
+          kubectl get service \
+            -n "${KUBERNETES_NAMESPACE}"
+
+
+      # ======================================================
+      # WAIT FOR ROLLOUT
+      # ======================================================
+
+      - name: Wait for Deployment Rollout
+        run: |
+
+          kubectl rollout status \
+            deployment/receipt-ocr-api \
+            -n "${KUBERNETES_NAMESPACE}" \
+            --timeout=10m
+
+
+      # ======================================================
+      # VERIFY POD
+      # ======================================================
+
+      - name: Verify Pod Status
+        run: |
+
+          kubectl get pods \
+            -n "${KUBERNETES_NAMESPACE}" \
+            -o wide
+
+          kubectl describe deployment \
+            receipt-ocr-api \
+            -n "${KUBERNETES_NAMESPACE}"
+
+
+      # ======================================================
+      # VERIFY SERVICE
+      # ======================================================
+
+      - name: Verify Service
+        run: |
+
+          kubectl get service \
+            receipt-ocr-api \
+            -n "${KUBERNETES_NAMESPACE}"
+
+
+      # ======================================================
+      # WAIT FOR LOAD BALANCER
+      # ======================================================
+
+      - name: Wait for LoadBalancer
         shell: bash
         run: |
-          if docker ps -a \
-            --format '{{.Names}}' \
-            | grep -Fxq "${CONTAINER_NAME}"; then
 
-            echo "Existing container found."
-
-            docker inspect \
-              "${CONTAINER_NAME}" \
-              --format='{{.Config.Image}}' \
-              > previous-image.txt || true
-
-            cat previous-image.txt || true
-
-            docker stop \
-              "${CONTAINER_NAME}" \
-              || true
-
-            docker rename \
-              "${CONTAINER_NAME}" \
-              "${CONTAINER_NAME}-previous" \
-              || true
-
-          else
-
-            echo "No existing deployment found."
-
-            : > previous-image.txt
-
-          fi
-
-      - name: Remove Previous Port Owner
-        shell: bash
-        run: |
-          docker ps -q \
-            --filter "publish=${HOST_PORT}" \
-            | xargs -r docker stop
-
-          docker ps -aq \
-            --filter "publish=${HOST_PORT}" \
-            | xargs -r docker rm -f
-
-      - name: Start New Deployment
-        run: |
-          docker run -d \
-            --name "${CONTAINER_NAME}" \
-            --restart unless-stopped \
-            -p "${HOST_PORT}:${CONTAINER_PORT}" \
-            -e PYTHONUNBUFFERED=1 \
-            "${IMAGE_URI}"
-
-      - name: Wait for Application Readiness
-        shell: bash
-        run: |
-          set -e
-
-          echo "Waiting for Receipt OCR API..."
-
-          READY=0
+          echo "Waiting for AWS LoadBalancer..."
 
           for i in {1..30}; do
 
-            if curl \
-              --fail \
-              --silent \
-              --show-error \
-              "http://127.0.0.1:${HOST_PORT}/health/ready"; then
+            HOSTNAME=$(kubectl get service \
+              receipt-ocr-api \
+              -n "${KUBERNETES_NAMESPACE}" \
+              -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' \
+              2>/dev/null || true)
 
-              echo
-              echo "Application is ready."
+            if [ -n "${HOSTNAME}" ]; then
 
-              READY=1
+              echo "LoadBalancer hostname:"
+              echo "${HOSTNAME}"
+
+              echo "LOAD_BALANCER_HOST=${HOSTNAME}" >> "${GITHUB_ENV}"
 
               break
 
             fi
 
-            echo "Attempt ${i}/30 failed. Retrying..."
-
+            echo "Waiting for LoadBalancer..."
             sleep 10
 
           done
 
-          if [ "${READY}" -ne 1 ]; then
-
-            echo "Application failed readiness check."
-
-            docker logs \
-              --tail 300 \
-              "${CONTAINER_NAME}"
-
-            exit 1
-
-          fi
-
-      - name: Verify Production Health
-        run: |
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            "http://127.0.0.1:${HOST_PORT}/health"
-
-          echo
-
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            "http://127.0.0.1:${HOST_PORT}/health/live"
-
-          echo
-
-      - name: Verify API Documentation
-        run: |
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            "http://127.0.0.1:${HOST_PORT}/api/docs" \
-            > /dev/null
-
-      - name: Show Deployment
-        run: |
-          docker ps
-          docker logs \
-            --tail 200 \
-            "${CONTAINER_NAME}"
 
       # ======================================================
-      # AUTOMATIC ROLLBACK
+      # APPLICATION HEALTH CHECK
       # ======================================================
 
-      - name: Rollback Failed Deployment
-        if: failure()
+      - name: Verify Kubernetes Application
         shell: bash
         run: |
-          echo "Deployment failed. Starting rollback."
 
-          docker logs \
-            --tail 300 \
-            "${CONTAINER_NAME}" \
-            || true
+          echo "Checking pod health..."
 
-          docker stop \
-            "${CONTAINER_NAME}" \
-            || true
+          kubectl get pods \
+            -n "${KUBERNETES_NAMESPACE}"
 
-          docker rm -f \
-            "${CONTAINER_NAME}" \
-            || true
+          echo "Checking recent application logs..."
 
-          if [ -f previous-image.txt ] \
-            && [ -s previous-image.txt ]; then
+          kubectl logs \
+            deployment/receipt-ocr-api \
+            -n "${KUBERNETES_NAMESPACE}" \
+            --tail=100
 
-            PREVIOUS_IMAGE=$(cat previous-image.txt)
 
-            echo "Previous image: ${PREVIOUS_IMAGE}"
+      # ======================================================
+      # DEPLOYMENT SUMMARY
+      # ======================================================
 
-            docker pull \
-              "${PREVIOUS_IMAGE}"
-
-            docker run -d \
-              --name "${CONTAINER_NAME}" \
-              --restart unless-stopped \
-              -p "${HOST_PORT}:${CONTAINER_PORT}" \
-              -e PYTHONUNBUFFERED=1 \
-              "${PREVIOUS_IMAGE}"
-
-            echo "Waiting for rollback recovery..."
-
-            for i in {1..20}; do
-
-              if curl \
-                --fail \
-                --silent \
-                --show-error \
-                "http://127.0.0.1:${HOST_PORT}/health/ready"; then
-
-                echo
-                echo "Rollback successful."
-
-                exit 0
-
-              fi
-
-              sleep 5
-
-            done
-
-            echo "Rollback health check failed."
-
-            docker logs \
-              --tail 300 \
-              "${CONTAINER_NAME}"
-
-            exit 1
-
-          else
-
-            echo "No previous deployment available for rollback."
-
-            exit 1
-
-          fi
-
-      - name: Cleanup Previous Container
-        if: success()
-        shell: bash
+      - name: Deployment Summary
         run: |
-          docker rm -f \
-            "${CONTAINER_NAME}-previous" \
-            || true
 
-      - name: Remove Old Docker Images
-        if: success()
-        shell: bash
-        run: |
-          docker image prune -af || true
+          echo "=========================================="
+          echo "Receipt OCR Deployment Complete"
+          echo "=========================================="
+
+          echo "Cluster:"
+          echo "${EKS_CLUSTER_NAME}"
+
+          echo "Namespace:"
+          echo "${KUBERNETES_NAMESPACE}"
+
+          echo "Image:"
+          echo "${IMAGE_URI}"
+
+          echo "LoadBalancer:"
+          echo "${LOAD_BALANCER_HOST:-pending}"
+
+          echo "=========================================="
